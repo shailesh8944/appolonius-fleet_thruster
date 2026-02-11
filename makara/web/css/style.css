@@ -1,0 +1,101 @@
+/**
+ * Marine Vessel CAD Configurator - Viewport and Component Styles
+ * 
+ * This stylesheet contains specialized styling for the 3D viewport and its related components.
+ * It focuses on performance optimizations for Three.js rendering and property panel layouts.
+ * 
+ * Key sections:
+ * - 3D viewport optimizations
+ * - Property panel layouts
+ * - Transform controls styling
+ * - Selection indicators
+ */
+
+/* 3D Viewport container with touch optimizations */
+#viewer3D {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    touch-action: none; /* Prevent touch scrolling for better control */
+}
+
+/* Canvas optimization for Three.js rendering */
+#viewer3D canvas {
+    display: block;
+    will-change: transform; /* Hardware acceleration hint */
+}
+
+/* Performance optimization for transform controls interactions */
+.transform-controls-visible * {
+    pointer-events: none;
+}
+
+/* Ensure controls remain interactive when visible */
+.transform-controls-visible .control {
+    pointer-events: auto;
+}
+
+/* Property panel for component inspection and editing */
+#object-properties {
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* Grouping of related properties in the property panel */
+.property-group {
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    background-color: var(--card-bg);
+}
+
+/* Title for property groups */
+.property-group-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+/* Row layout for property name-value pairs */
+.property-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+/* Property label styling */
+.property-label {
+    width: 30%;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Property value container */
+.property-value {
+    width: 70%;
+}
+
+/* Input fields inside property panel */
+.property-value .form-control {
+    height: 30px;
+    padding: 2px 6px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
+}
+
+/* Input groups for multi-component inputs (like x,y,z) */
+.property-value .input-group {
+    display: flex;
+    gap: 5px;
+}
+
+/* Message displayed when no object is selected */
+.no-selection-message {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted-color);
+    font-style: italic;
+} 

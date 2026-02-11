@@ -1,0 +1,1896 @@
+<!--
+/**
+ * Marine Vessel CAD Configurator
+ * 
+ * This is the main HTML file for a sophisticated marine vessel simulation and configuration application.
+ * The application allows users to design, configure, and simulate various types of marine vessels including:
+ * - Autonomous Underwater Vehicles (AUVs)
+ * - Unmanned Surface Vehicles (USVs)
+ * - Ships
+ * - Remotely Operated Vehicles (ROVs)
+ * 
+ * The interface provides tools for:
+ * - 3D vessel modeling and visualization
+ * - Component placement (thrusters, control surfaces, sensors)
+ * - Physics parameter configuration
+ * - Hydrodynamics settings
+ * - Simulation setup
+ * - YAML configuration generation
+ * 
+ * The application uses Three.js for 3D visualization and follows a modern CAD-like UI pattern
+ * with sidebars, toolbars, and workspace views.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marine Vessel CAD Configurator</title>
+    
+    <!-- External CSS Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Leaflet Map CSS for geofencing functionality -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Custom CSS for application styling -->
+    <link href="styles.css" rel="stylesheet">
+    <link href="themes.css" rel="stylesheet">
+    
+    <!-- Three.js and related libraries for 3D visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/inflate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/fflate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/TGALoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/stats.min.js"></script>
+    
+    <!-- Additional libraries for file handling and UI functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+</head>
+<body>
+    <!-- Main application container with CAD-like layout -->
+    <div class="cad-container">
+        <!-- Top toolbar section with application controls -->
+        <div class="toolbar" id="main-toolbar">
+            <div class="app-title">
+                <i class="bi bi-water"></i> Panisim: Vessel Configurator
+            </div>
+            <div class="toolbar-items">
+                <button class="toolbar-btn" id="btn-new-vessel" title="New vessel">
+                    <i class="bi bi-file-earmark-plus"></i>
+                </button>
+                <button class="toolbar-btn" id="btn-load-vessel" title="Load vessel">
+                    <i class="bi bi-folder2-open"></i>
+                </button>
+                <button class="toolbar-btn" id="btn-save-vessel" title="Save vessel">
+                    <i class="bi bi-save"></i>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn" id="btn-undo" title="Undo">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+                <button class="toolbar-btn" id="btn-redo" title="Redo">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn" id="btn-generate-yaml" title="Generate YAML files">
+                    <i class="bi bi-file-earmark-code"></i> Generate YAML
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn theme-toggle-btn" id="btn-toggle-theme" title="Toggle dark/light mode">
+                    <span class="theme-toggle-icon">
+                        <i class="bi bi-sun-fill theme-icon-light"></i>
+                        <i class="bi bi-moon-fill theme-icon-dark"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main content area with sidebars and 3D view -->
+        <div class="main-content">
+            <!-- Left sidebar: Project explorer and properties panels -->
+            <div class="left-sidebar" id="left-sidebar">
+                <div class="sidebar-tabs">
+                    <div class="sidebar-tab active" data-tab="project-tab">
+                        <i class="bi bi-kanban"></i> Project
+                    </div>
+                    <div class="sidebar-tab" data-tab="properties-tab">
+                        <i class="bi bi-gear"></i> Properties
+                    </div>
+                </div>
+                
+                <!-- Project tab content - contains vessel configuration -->
+                <div class="sidebar-content active" id="project-tab">
+                    <div class="panel vessel-info-panel">
+                        <div class="panel-header">
+                            <h5>Vessel Information</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label for="vesselName">Name</label>
+                                <input type="text" class="form-control" id="vesselName" placeholder="Enter vessel name">
+                            </div>
+                            <div class="form-group">
+                                <label for="vesselType">Type</label>
+                                <select class="form-control" id="vesselType">
+                                    <option value="auv">AUV</option>
+                                    <option value="usv">USV</option>
+                                    <option value="ship">Ship</option>
+                                    <option value="rov">ROV</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hierarchy tree panel for scene objects -->
+                    <div class="panel hierarchy-panel">
+                        <div class="panel-header">
+                            <h5>Hierarchy</h5>
+                            <div class="panel-actions">
+                                <button class="btn-icon" id="expandAll" title="Expand all">
+                                    <i class="bi bi-arrows-expand"></i>
+                                </button>
+                                <button class="btn-icon" id="collapseAll" title="Collapse all">
+                                    <i class="bi bi-arrows-collapse"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div id="scene-hierarchy" class="hierarchy-tree">
+                                <!-- Hierarchy items will be populated dynamically via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Properties tab content - shows properties of selected objects -->
+                <div class="sidebar-content" id="properties-tab">
+                    <div class="panel properties-panel">
+                        <div class="panel-header">
+                            <h5>Object Properties</h5>
+                        </div>
+                        <div class="panel-body" id="object-properties">
+                            <div class="no-selection-message">
+                                Select an object to view its properties
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main 3D viewport - central working area -->
+            <div class="viewport" id="viewer3D">
+                <!-- 3D viewport will be rendered here via Three.js -->
+                <div class="viewport-overlay">
+                    <div class="viewport-tools">
+                        <button class="viewport-btn" id="btn-translate" title="Translate (G)">
+                            <i class="bi bi-arrows-move"></i>
+                        </button>
+                        <button class="viewport-btn" id="btn-rotate" title="Rotate (R)">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </button>
+                        <button class="viewport-btn" id="btn-scale" title="Scale (S)">
+                            <i class="bi bi-arrows-angle-expand"></i>
+                        </button>
+                        <div class="viewport-tools-divider"></div>
+                        <button class="viewport-btn" id="btn-toggle-grid" title="Toggle Grid">
+                            <i class="bi bi-grid-3x3"></i>
+                        </button>
+                        <button class="viewport-btn" id="btn-toggle-wireframe" title="Toggle Wireframe">
+                            <i class="bi bi-bounding-box"></i>
+                        </button>
+                        <button class="viewport-btn" id="btn-toggle-geometry" title="Toggle Geometry">
+                            <i class="bi bi-box"></i>
+                        </button>
+                        <button class="viewport-btn" id="btn-center-view" title="Center View">
+                            <i class="bi bi-fullscreen"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right sidebar: Components and simulation settings -->
+            <div class="right-sidebar" id="right-sidebar">
+                <div class="sidebar-tabs">
+                    <div class="sidebar-tab active" data-tab="components-tab">
+                        <i class="bi bi-box"></i> Components
+                    </div>
+                    <div class="sidebar-tab" data-tab="simulation-tab">
+                        <i class="bi bi-sliders"></i> Simulation
+                    </div>
+                </div>
+                
+                <!-- Components tab content - component library and model files -->
+                <div class="sidebar-content active" id="components-tab">
+                    <div class="panel component-panel">
+                        <div class="panel-header">
+                            <h5>Model Files</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>3D Model</label>
+                                <div class="file-input-group">
+                                    <input type="file" class="form-control" id="fbxFile" accept=".fbx,.stl,.obj,.gltf">
+                                    <small class="text-muted">Load FBX, STL, OBJ, or GLTF file</small>
+                                </div>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="toggleGeometryVisibility" checked>
+                                    <label class="form-check-label" for="toggleGeometryVisibility">Show 3D Model</label>
+                                </div>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="toggleModelSelectable" checked>
+                                    <label class="form-check-label" for="toggleModelSelectable">Make 3D Model Selectable</label>
+                                </div>
+                                <div class="form-group mt-2">
+                                    <label for="modelTransparency">Model Transparency</label>
+                                    <input type="range" class="form-range" id="modelTransparency" min="0" max="100" value="0">
+                                    <div class="d-flex justify-content-between">
+                                        <small>Opaque</small>
+                                        <small>Transparent</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Hydra Output</label>
+                                <div class="file-input-group">
+                                    <input type="file" class="form-control" id="hydraZip" accept=".zip">
+                                    <small class="text-muted">Load Hydra output zip file</small>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>NACA Airfoil Data</label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">Profile</span>
+                                    <input type="text" class="form-control" id="nacaNumber" value="0015">
+                                </div>
+                                <div class="file-input-group">
+                                    <input type="file" class="form-control" id="nacaFileUpload" accept=".csv">
+                                    <small class="text-muted">Upload CSV file with Alpha, Cl, Cd columns</small>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Hydrodynamics Parameters</label>
+                                <button class="btn btn-outline-primary w-100" id="btnEditHydrodynamics">
+                                    Edit Hydrodynamic Coefficients
+                                </button>
+                                <small class="text-muted">Edit drag coefficients and other hydrodynamic parameters</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Component addition panel -->
+                    <div class="panel component-panel">
+                        <div class="panel-header">
+                            <h5>Add Components</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="component-buttons">
+                                <button class="component-btn" id="btn-add-control-surface">
+                                    <i class="bi bi-box"></i>
+                                    <span>Control Surface</span>
+                                </button>
+                                <button class="component-btn" id="btn-add-thruster">
+                                    <i class="bi bi-circle"></i>
+                                    <span>Thruster</span>
+                                </button>
+                                <button class="component-btn" id="btn-add-sensor">
+                                    <i class="bi bi-cpu"></i>
+                                    <span>Sensor</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Center Points Controls -->
+                    <div class="panel component-panel">
+                        <div class="panel-header">
+                            <h5>Geometry Centers</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="toggleCenterPoints" checked>
+                                <label class="form-check-label" for="toggleCenterPoints">Show Center Points</label>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">CO - Center of Origin (Red)</small><br>
+                                <small class="text-muted">CG - Center of Gravity (Green)</small><br>
+                                <small class="text-muted">CB - Center of Buoyancy (Blue)</small>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-primary w-100" id="btnEditGeometry">
+                                    <i class="bi bi-pencil-square"></i> Edit Geometry Parameters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Simulation tab content -->
+                <div class="sidebar-content" id="simulation-tab">
+                    <div class="panel simulation-panel">
+                        <div class="panel-header">
+                            <h5>Simulation Settings</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label for="simTime">Simulation Time (s)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="simTime" value="100" min="0">
+                                    <span class="input-group-text">s</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="timeStep">Time Step (s)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="timeStep" value="0.01" min="0.001" step="0.001">
+                                    <span class="input-group-text">s</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="density">Water Density (kg/m³)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="density" value="1025" min="0">
+                                    <span class="input-group-text">kg/m³</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="gravity">Gravity (m/s²)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="gravity" value="9.80665" step="0.00001">
+                                    <span class="input-group-text">m/s²</span>
+                                </div>
+                            </div>
+                            <div class="form-group mt-3">
+                                <button class="btn btn-outline-primary w-100" id="btnAdvancedSimParams">
+                                    Advanced Simulation Parameters
+                                </button>
+                                <small class="text-muted">Edit geofence coordinates and other advanced settings</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel simulation-panel">
+                        <div class="panel-header">
+                            <h5>World Settings</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>World Size (m)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="worldSizeX" placeholder="X" value="1000">
+                                    <input type="number" class="form-control" id="worldSizeY" placeholder="Y" value="1000">
+                                    <input type="number" class="form-control" id="worldSizeZ" placeholder="Z" value="100">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>GPS Datum [lat, lon, alt]</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="gpsDatumLat" placeholder="Lat" value="12.99300">
+                                    <span class="input-group-text">°</span>
+                                    <input type="number" class="form-control" id="gpsDatumLon" placeholder="Lon" value="80.23913">
+                                    <span class="input-group-text">°</span>
+                                    <input type="number" class="form-control" id="gpsDatumAlt" placeholder="Alt" value="-87.0">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel simulation-panel">
+                        <div class="panel-header">
+                            <h5>Vessel Configuration</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <button class="btn btn-outline-primary w-100 mb-2" id="btnEditInitialConditions">
+                                    Edit Initial Conditions
+                                </button>
+                                <small class="text-muted">Configure start location, orientation, and velocity</small>
+                            </div>
+                            
+                            <div class="form-group mt-3">
+                                <button class="btn btn-outline-primary w-100 mb-2" id="btnEditInertia">
+                                    Edit Inertia Parameters
+                                </button>
+                                <small class="text-muted">Configure mass, buoyancy, and inertia matrices</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for adding control surface -->
+    <div class="modal fade" id="controlSurfaceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Control Surface</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="controlSurfaceType">Type</label>
+                        <select class="form-control" id="controlSurfaceType">
+                            <option value="Rudder">Rudder</option>
+                            <option value="Fins">Fins</option>
+                            <option value="Elevator">Elevator</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="controlSurfaceId">ID</label>
+                        <input type="number" class="form-control" id="controlSurfaceId" value="1" min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Position [x, y, z]</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="csPositionX" value="0" step="0.1">
+                            <input type="number" class="form-control" id="csPositionY" value="0" step="0.1">
+                            <input type="number" class="form-control" id="csPositionZ" value="0" step="0.1">
+                            <span class="input-group-text">m</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Orientation [roll, pitch, yaw] (degrees)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="csOrientationX" value="0" step="1">
+                            <input type="number" class="form-control" id="csOrientationY" value="0" step="1">
+                            <input type="number" class="form-control" id="csOrientationZ" value="0" step="1">
+                            <span class="input-group-text">°</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="csArea">Area (m²)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="csArea" value="0.1" min="0.01" step="0.01">
+                            <span class="input-group-text">m²</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="csNACA">NACA Profile</label>
+                        <input type="text" class="form-control" id="csNACA" value="0015">
+                    </div>
+                    <div class="form-group">
+                        <label for="csTimeConstant">Time Constant (T)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="csTimeConstant" value="0.1" min="0.01" step="0.01">
+                            <span class="input-group-text">s</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="csDeltaMax">Max Deflection Angle (deg)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="csDeltaMax" value="35.0" min="1" step="1">
+                            <span class="input-group-text">°</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="csDeltadMax">Max Deflection Rate (deg/s)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="csDeltadMax" value="1.0" min="0.1" step="0.1">
+                            <span class="input-group-text">°/s</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnAddControlSurface">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for adding thruster -->
+    <div class="modal fade" id="thrusterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Thruster</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="thrusterName">Name</label>
+                        <input type="text" class="form-control" id="thrusterName" placeholder="e.g., back">
+                    </div>
+                    <div class="form-group">
+                        <label for="thrusterId">ID</label>
+                        <input type="number" class="form-control" id="thrusterId" value="1" min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Position [x, y, z]</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="thrusterPositionX" value="0" step="0.1">
+                            <input type="number" class="form-control" id="thrusterPositionY" value="0" step="0.1">
+                            <input type="number" class="form-control" id="thrusterPositionZ" value="0" step="0.1">
+                            <span class="input-group-text">m</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Orientation [roll, pitch, yaw] (degrees)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="thrusterOrientationX" value="0" step="1">
+                            <input type="number" class="form-control" id="thrusterOrientationY" value="0" step="1">
+                            <input type="number" class="form-control" id="thrusterOrientationZ" value="0" step="1">
+                            <span class="input-group-text">°</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="thrusterTProp">Thrust Coefficient (T_prop)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="thrusterTProp" value="1.0" min="0.1" step="0.1">
+                            <span class="input-group-text">N</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="thrusterDiameter">Propeller Diameter (D_prop) (m)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="thrusterDiameter" value="0.1" min="0.01" step="0.01">
+                            <span class="input-group-text">m</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="thrusterTp">Time Constant (tp)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="thrusterTp" value="0.1" min="0.01" step="0.01">
+                            <span class="input-group-text">s</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="thrusterJvsKTFile">J vs KT File Path</label>
+                        <input type="text" class="form-control" id="thrusterJvsKTFile" value="J_vs_KT.csv">
+                        <small class="text-muted">Will be placed in vessel directory</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="thrusterKTatJ0">KT at J0</label>
+                        <input type="number" class="form-control" id="thrusterKTatJ0" value="0.0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="thrusterNMax">Maximum RPM (n_max)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="thrusterNMax" value="2668" min="1" step="1">
+                            <span class="input-group-text">RPM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnAddThruster">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for adding sensor -->
+    <div class="modal fade" id="sensorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Sensor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="sensorType">Type</label>
+                        <select class="form-control" id="sensorType">
+                            <option value="IMU">IMU</option>
+                            <option value="GPS">GPS</option>
+                            <option value="DVL">DVL</option>
+                            <option value="encoders">Encoders</option>
+                            <option value="Depth">Depth</option>
+                            <option value="Camera">Camera</option>
+                            <option value="Sonar">Sonar</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="sensorLocationGroup">
+                        <label>Position [x, y, z]</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="sensorPositionX" value="0" step="0.1">
+                            <input type="number" class="form-control" id="sensorPositionY" value="0" step="0.1">
+                            <input type="number" class="form-control" id="sensorPositionZ" value="0" step="0.1">
+                            <span class="input-group-text">m</span>
+                        </div>
+                    </div>
+                    <div class="form-group" id="sensorOrientationGroup">
+                        <label>Orientation [quaternion: w, x, y, z]</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="sensorOrientationW" value="1.0" step="0.1">
+                            <input type="number" class="form-control" id="sensorOrientationX" value="0" step="0.1">
+                            <input type="number" class="form-control" id="sensorOrientationY" value="0" step="0.1">
+                            <input type="number" class="form-control" id="sensorOrientationZ" value="0" step="0.1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sensorPublishRate">Publish Rate (Hz)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="sensorPublishRate" value="10" min="0.1" step="0.1">
+                            <span class="input-group-text">Hz</span>
+                        </div>
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" value="" id="sensorNoneLocation">
+                        <label class="form-check-label" for="sensorNoneLocation">
+                            Set location to None (for sensors like encoders)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="sensorNoneOrientation">
+                        <label class="form-check-label" for="sensorNoneOrientation">
+                            Set orientation to None (for sensors like encoders)
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnAddSensor">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for component details when selecting in the FBX model -->
+    <div class="modal fade" id="fbxComponentModal" tabindex="-1" role="dialog" aria-labelledby="fbxComponentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fbxComponentModalLabel">Configure Component</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="fbxComponentType" value="">
+                    
+                    <!-- Control Surface Settings -->
+                    <div id="fbxControlSurfaceSettings" style="display: none;">
+                        <div class="mb-3">
+                            <label for="fbxSurfaceType" class="form-label">Surface Type</label>
+                            <select class="form-select" id="fbxSurfaceType">
+                                <option value="Rudder">Rudder</option>
+                                <option value="Fins">Fins</option>
+                                <option value="Elevator">Elevator</option>
+                                <option value="Aileron">Aileron</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSurfaceId" class="form-label">ID</label>
+                            <input type="number" class="form-control" id="fbxSurfaceId" value="" min="1" step="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSurfaceName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="fbxSurfaceName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSurfaceArea" class="form-label">Area (m²)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxSurfaceArea" value="0.1" min="0.01" step="0.01">
+                                <span class="input-group-text">m²</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSurfaceNACA" class="form-label">NACA Profile</label>
+                            <input type="text" class="form-control" id="fbxSurfaceNACA" value="0015">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSurfaceTimeConstant" class="form-label">Time Constant (T)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxSurfaceTimeConstant" value="0.1" min="0.01" step="0.01">
+                                <span class="input-group-text">s</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSurfaceDeltaMax" class="form-label">Max Deflection Angle (deg)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxSurfaceDeltaMax" value="35.0" min="1" step="1">
+                                <span class="input-group-text">°</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSurfaceDeltadMax" class="form-label">Max Deflection Rate (deg/s)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxSurfaceDeltadMax" value="1.0" min="0.1" step="0.1">
+                                <span class="input-group-text">°/s</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Thruster Settings -->
+                    <div id="fbxThrusterSettings" style="display: none;">
+                        <div class="mb-3">
+                            <label for="fbxThrusterName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="fbxThrusterName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxThrusterId" class="form-label">ID</label>
+                            <input type="number" class="form-control" id="fbxThrusterId" value="1" min="1" step="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxThrusterTProp" class="form-label">Thrust Coefficient (T_prop)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxThrusterTProp" value="1.0" min="0.1" step="0.1">
+                                <span class="input-group-text">N</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxThrusterDiameter" class="form-label">Propeller Diameter (D_prop)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxThrusterDiameter" value="0.1" min="0.01" step="0.01">
+                                <span class="input-group-text">m</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxThrusterTp" class="form-label">Time Constant (tp)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxThrusterTp" value="0.1" min="0.01" step="0.01">
+                                <span class="input-group-text">s</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxThrusterJvsKTFile" class="form-label">J vs KT File Path</label>
+                            <input type="text" class="form-control" id="fbxThrusterJvsKTFile" value="J_vs_KT.csv">
+                            <small class="text-muted">Will be placed in vessel directory</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxThrusterKTatJ0" class="form-label">KT at J0</label>
+                            <input type="number" class="form-control" id="fbxThrusterKTatJ0" value="0.0" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxThrusterNMax" class="form-label">Maximum RPM (n_max)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxThrusterNMax" value="2668" min="1" step="1">
+                                <span class="input-group-text">RPM</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sensor Settings -->
+                    <div id="fbxSensorSettings" style="display: none;">
+                        <div class="mb-3">
+                            <label for="fbxSensorType" class="form-label">Sensor Type</label>
+                            <select class="form-select" id="fbxSensorType">
+                                <option value="IMU">IMU</option>
+                                <option value="GPS">GPS</option>
+                                <option value="DVL">DVL</option>
+                                <option value="encoders">Encoders</option>
+                                <option value="Pressure">Pressure Sensor</option>
+                                <option value="Camera">Camera</option>
+                                <option value="Sonar">Sonar</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSensorId" class="form-label">ID</label>
+                            <input type="number" class="form-control" id="fbxSensorId" value="1" min="1" step="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSensorName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="fbxSensorName">
+                        </div>
+                        <div class="mb-3" id="fbxSensorOrientationGroup">
+                            <label class="form-label">Orientation [quaternion: w, x, y, z]</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxSensorOrientationW" value="1.0" step="0.1">
+                                <input type="number" class="form-control" id="fbxSensorOrientationX" value="0" step="0.1">
+                                <input type="number" class="form-control" id="fbxSensorOrientationY" value="0" step="0.1">
+                                <input type="number" class="form-control" id="fbxSensorOrientationZ" value="0" step="0.1">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fbxSensorRate" class="form-label">Publish Rate</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="fbxSensorRate" value="10" min="1" max="1000">
+                                <span class="input-group-text">Hz</span>
+                            </div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="fbxSensorNoneLocation">
+                            <label class="form-check-label" for="fbxSensorNoneLocation">
+                                Set location to None (for sensors like encoders)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="fbxSensorNoneOrientation">
+                            <label class="form-check-label" for="fbxSensorNoneOrientation">
+                                Set orientation to None (for sensors like encoders)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnApplyFbxComponent">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for YAML generation -->
+    <div class="modal fade" id="yamlModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generate YAML Files</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="outputPath">Output Directory Path</label>
+                        <input type="text" class="form-control" id="outputPath" value="/workspaces/mavlab/inputs/">
+                        <small class="text-muted">Files will be generated in [path]/[vessel-name]/</small>
+                    </div>
+                    <div class="yaml-preview-tabs">
+                        <ul class="nav nav-tabs" id="yamlTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="simulation-tab" data-bs-toggle="tab" data-bs-target="#simulation-yaml" type="button" role="tab" aria-selected="true">simulation_input.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="geometry-tab" data-bs-toggle="tab" data-bs-target="#geometry-yaml" type="button" role="tab" aria-selected="false">geometry.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="inertia-tab" data-bs-toggle="tab" data-bs-target="#inertia-yaml" type="button" role="tab" aria-selected="false">inertia.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="hydrodynamics-tab" data-bs-toggle="tab" data-bs-target="#hydrodynamics-yaml" type="button" role="tab" aria-selected="false">hydrodynamics.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="control-surfaces-tab" data-bs-toggle="tab" data-bs-target="#control-surfaces-yaml" type="button" role="tab" aria-selected="false">control_surfaces.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="thrusters-tab" data-bs-toggle="tab" data-bs-target="#thrusters-yaml" type="button" role="tab" aria-selected="false">thrusters.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sensors-tab" data-bs-toggle="tab" data-bs-target="#sensors-yaml" type="button" role="tab" aria-selected="false">sensors.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="initial-conditions-tab" data-bs-toggle="tab" data-bs-target="#initial-conditions-yaml" type="button" role="tab" aria-selected="false">initial_conditions.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="guidance-tab" data-bs-toggle="tab" data-bs-target="#guidance-yaml" type="button" role="tab" aria-selected="false">guidance.yml</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="control-tab" data-bs-toggle="tab" data-bs-target="#control-yaml" type="button" role="tab" aria-selected="false">control.yml</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="yamlTabContent">
+                            <div class="tab-pane fade show active" id="simulation-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="simulation-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="geometry-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="geometry-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="inertia-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="inertia-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="hydrodynamics-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="hydrodynamics-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="control-surfaces-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="control-surfaces-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="thrusters-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="thrusters-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="sensors-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="sensors-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="initial-conditions-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="initial-conditions-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="guidance-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="guidance-yaml-content"></pre>
+                            </div>
+                            <div class="tab-pane fade" id="control-yaml" role="tabpanel">
+                                <pre class="yaml-preview" id="control-yaml-content"></pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Included Files Section -->
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0 d-flex align-items-center">
+                                <i class="bi bi-file-earmark-zip me-2"></i>
+                                Files Included in ZIP
+                            </h6>
+                        </div>
+                        <div class="card-body" id="yamlIncludedFiles">
+                            <p class="mb-0 text-muted">Files will be listed here when generating the ZIP</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-info" id="btnRefreshPreviews">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Previews
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnDownloadZip">Download as ZIP</button>
+                    <button type="button" class="btn btn-success" id="btnGenerateYaml">Generate YAML</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for editing hydrodynamics parameters -->
+    <div class="modal fade" id="hydrodynamicsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Hydrodynamics Parameters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label>General Parameters</label>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="dimFlag">
+                            <label class="form-check-label" for="dimFlag">Dimensionalized Flag</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="crossFlowDrag">
+                            <label class="form-check-label" for="crossFlowDrag">Cross Flow Drag</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="hydroFileUpload">Upload Coefficients File</label>
+                        <input type="file" class="form-control" id="hydroFileUpload" accept=".txt,.csv">
+                        <small class="text-muted">Upload a text file with coefficient values</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hydroCoefficients">Hydrodynamic Coefficients</label>
+                        <textarea class="form-control" id="hydroCoefficients" rows="15" style="font-family: monospace;"></textarea>
+                        <small class="text-muted">Enter coefficients in the format: <code>COEFFICIENT_NAME: VALUE</code></small>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <h6>Instructions:</h6>
+                        <p>Enter each coefficient on a new line using the format <code>COEFFICIENT_NAME: VALUE</code></p>
+                        <p>Example:</p>
+                        <pre class="code-example"># Surge coefficients
+X_u_u: -0.01
+X_u_v: 0.05
+X_u_r: 0.001
+
+# Sway coefficients
+Y_v_v: -0.010659050686665396
+Y_r_r: 0.0017799664706713543
+
+# Other coefficients
+N_r_r: -0.001889456681929024
+Z_w_w: -0.01</pre>
+                        <p>Notes:</p>
+                        <ul style="font-size: 12px;">
+                            <li>You can add comments using <code>#</code> at the start of a line</li>
+                            <li>Empty lines are ignored</li>
+                            <li>All coefficients will be included in the hydrodynamics.yml file</li>
+                            <li>Common coefficient naming follows the format <code>FORCE_VELOCITY_VELOCITY</code>, where:</li>
+                            <li><strong>FORCE</strong> is X, Y, Z, K, M, or N (indicating the force/moment direction)</li>
+                            <li><strong>VELOCITY</strong> is u, v, w, p, q, or r (indicating the motion component)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveHydrodynamics">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for advanced simulation parameters -->
+    <div class="modal fade" id="simParamsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Advanced Simulation Parameters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="simParamsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="basic-params-tab" data-bs-toggle="tab" data-bs-target="#basic-params" type="button" role="tab" aria-selected="true">Basic Parameters</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="geofence-tab" data-bs-toggle="tab" data-bs-target="#geofence-params" type="button" role="tab" aria-selected="false">Geofence</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="agents-tab" data-bs-toggle="tab" data-bs-target="#agents-params" type="button" role="tab" aria-selected="false">Agents</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#yaml-params" type="button" role="tab" aria-selected="false">YAML Editor</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="simParamsTabContent">
+                        <!-- Basic Parameters Tab -->
+                        <div class="tab-pane fade show active" id="basic-params" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="simTimeSetting">Simulation Time (s)</label>
+                                        <input type="number" class="form-control" id="simTimeSetting" value="100" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="timeStepSetting">Time Step (s)</label>
+                                        <input type="number" class="form-control" id="timeStepSetting" value="0.01" min="0.001" step="0.001">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="densitySetting">Water Density (kg/m³)</label>
+                                        <input type="number" class="form-control" id="densitySetting" value="1025" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="gravitySetting">Gravity (m/s²)</label>
+                                        <input type="number" class="form-control" id="gravitySetting" value="9.80665" step="0.00001">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label>World Size (m)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="worldSizeXSetting" placeholder="X" value="1000">
+                                    <input type="number" class="form-control" id="worldSizeYSetting" placeholder="Y" value="1000">
+                                    <input type="number" class="form-control" id="worldSizeZSetting" placeholder="Z" value="100">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                                <div class="form-check mt-1">
+                                    <input class="form-check-input" type="checkbox" id="infiniteZSetting" checked>
+                                    <label class="form-check-label" for="infiniteZSetting">
+                                        Use infinite depth (Z dimension)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label>GPS Datum [lat, lon, alt]</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="gpsDatumLatSetting" placeholder="Lat" value="12.99300" step="0.00001">
+                                    <span class="input-group-text">°</span>
+                                    <input type="number" class="form-control" id="gpsDatumLonSetting" placeholder="Lon" value="80.23913" step="0.00001">
+                                    <span class="input-group-text">°</span>
+                                    <input type="number" class="form-control" id="gpsDatumAltSetting" placeholder="Alt" value="-87.0" step="0.01">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="numAgentsSetting">Number of Agents</label>
+                                <input type="number" class="form-control" id="numAgentsSetting" value="1" min="1" max="10">
+                            </div>
+                        </div>
+                        
+                        <!-- Geofence Tab -->
+                        <div class="tab-pane fade" id="geofence-params" role="tabpanel">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <h6 class="mb-2 d-flex justify-content-between align-items-center">
+                                        <span>Map Selection</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="expandMapBtn" data-bs-toggle="tooltip" title="View in larger window">
+                                            <i class="bi bi-arrows-fullscreen"></i>
+                                        </button>
+                                    </h6>
+                                    <div id="geofence-map" style="height: 300px; width: 100%; border-radius: 4px;"></div>
+                                    <div class="mt-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" id="setGpsDatum">
+                                                <i class="bi bi-geo-alt"></i> Set GPS Datum
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" id="clearGeofence">
+                                                <i class="bi bi-trash"></i> Clear Geofence
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle"></i> Click map to add geofence points
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">Geofence Coordinates</h6>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-primary" id="addGeofencePoint">
+                                        <i class="bi bi-plus-circle"></i> Add Point
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-secondary" id="copyFromMapGeofence">
+                                        <i class="bi bi-geo-alt"></i> Update from Map
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="geofenceTable">
+                                    <thead>
+                                        <tr>
+                                            <th width="45%">Latitude</th>
+                                            <th width="45%">Longitude</th>
+                                            <th width="10%">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="geofenceTableBody">
+                                        <!-- Points will be added here dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-info-circle"></i>
+                                <small>The geofence should form a closed polygon. The first and last points should be the same.</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Agents Tab -->
+                        <div class="tab-pane fade" id="agents-params" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Simulation Agents</h5>
+                                <button type="button" class="btn btn-sm btn-primary" id="btnAddAgent">
+                                    <i class="bi bi-plus"></i> Add Agent
+                                </button>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="numAgentsSetting">Number of Agents</label>
+                                <input type="number" class="form-control" id="numAgentsSetting" value="1" min="1" max="10">
+                                <small class="text-muted">Total number of agents in the simulation</small>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="agentsTableBody">
+                                        <!-- Agent rows will be added here dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="alert alert-info small">
+                                <i class="bi bi-info-circle"></i> Each agent will use configuration files from its own directory.
+                                The file structure will be: /workspaces/mavlab/inputs/[agent-name]/
+                            </div>
+                        </div>
+                        
+                        <!-- YAML Editor Tab -->
+                        <div class="tab-pane fade" id="yaml-params" role="tabpanel">
+                            <div class="form-group mb-3">
+                                <label for="simParamsFileUpload">Upload Parameters File</label>
+                                <input type="file" class="form-control" id="simParamsFileUpload" accept=".txt,.yml,.yaml">
+                                <small class="text-muted">Upload a YAML file with simulation parameters</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="simParamsYaml">Simulation Parameters</label>
+                                <textarea class="form-control" id="simParamsYaml" rows="20" style="font-family: monospace;"></textarea>
+                                <small class="text-muted">Edit parameters directly in YAML format</small>
+                            </div>
+
+                            <div class="alert alert-info mt-3">
+                                <h6>Instructions:</h6>
+                                <p>Edit simulation parameters directly in YAML format. Parameters include:</p>
+                                <ul style="font-size: 12px;">
+                                    <li><strong>sim_time</strong>: Simulation time in seconds</li>
+                                    <li><strong>time_step</strong>: Time step in seconds</li>
+                                    <li><strong>density</strong>: Water density in kg/m³</li>
+                                    <li><strong>gravity</strong>: Gravity in m/s²</li>
+                                    <li><strong>world_size</strong>: Array of [x, y, z] dimensions in meters</li>
+                                    <li><strong>gps_datum</strong>: Array of [latitude, longitude, altitude]</li>
+                                    <li><strong>geofence</strong>: List of coordinate pairs defining the boundaries</li>
+                                    <li><strong>nagents</strong>: Number of agents in the simulation</li>
+                                    <li><strong>agents</strong>: Configuration for each agent</li>
+                                </ul>
+                                <p>Example:</p>
+                                <pre class="code-example">#Simulation Specific Inputs
+sim_time: 5
+time_step: 0.01
+density: 1000
+gravity: 9.80665
+world_size: [100, 100, Inf]
+gps_datum: [12.99300425860631, 80.23913114094384, -87.0]
+
+geofence:
+  - [12.993496, 80.239007]
+  - [12.993500, 80.238903]
+  # Add more coordinates as needed</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveSimParams">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for editing initial conditions -->
+    <div class="modal fade" id="initialConditionsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Initial Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label for="initialConditionsFileUpload">Upload Initial Conditions File</label>
+                        <input type="file" class="form-control" id="initialConditionsFileUpload" accept=".txt,.yml,.yaml">
+                        <small class="text-muted">Upload a YAML file with initial conditions</small>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label>Start Location [x, y, z] (meters)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="startLocationX" placeholder="X" value="0" step="0.1">
+                            <input type="number" class="form-control" id="startLocationY" placeholder="Y" value="0" step="0.1">
+                            <input type="number" class="form-control" id="startLocationZ" placeholder="Z" value="0" step="0.1">
+                            <span class="input-group-text">m</span>
+                        </div>
+                        <small class="text-muted">Initial position in the world coordinate system</small>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label>Start Orientation [roll, pitch, yaw] (radians)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="startOrientationRoll" placeholder="Roll" value="0" step="0.01">
+                            <input type="number" class="form-control" id="startOrientationPitch" placeholder="Pitch" value="0" step="0.01">
+                            <input type="number" class="form-control" id="startOrientationYaw" placeholder="Yaw" value="0" step="0.01">
+                            <span class="input-group-text">rad</span>
+                        </div>
+                        <small class="text-muted">Initial orientation angles in radians</small>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label>Start Velocity [u, v, w] (m/s)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="startVelocityU" placeholder="U" value="0" step="0.1">
+                            <input type="number" class="form-control" id="startVelocityV" placeholder="V" value="0" step="0.1">
+                            <input type="number" class="form-control" id="startVelocityW" placeholder="W" value="0" step="0.1">
+                            <span class="input-group-text">m/s</span>
+                        </div>
+                        <small class="text-muted">Initial linear velocities in the body-fixed frame</small>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label>Start Angular Velocity [p, q, r] (rad/s)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="startVelocityP" placeholder="P" value="0" step="0.01">
+                            <input type="number" class="form-control" id="startVelocityQ" placeholder="Q" value="0" step="0.01">
+                            <input type="number" class="form-control" id="startVelocityR" placeholder="R" value="0" step="0.01">
+                            <span class="input-group-text">rad/s</span>
+                        </div>
+                        <small class="text-muted">Initial angular velocities in the body-fixed frame</small>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="useQuaternion">
+                        <label class="form-check-label" for="useQuaternion">
+                            Use quaternion for orientation
+                        </label>
+                        <small class="d-block text-muted">Enable if you want to use quaternions instead of Euler angles</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveInitialConditions">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for editing inertia parameters -->
+    <div class="modal fade" id="inertiaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Inertia Parameters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label for="inertiaFileUpload">Upload Inertia File</label>
+                        <input type="file" class="form-control" id="inertiaFileUpload" accept=".txt,.yml,.yaml">
+                        <small class="text-muted">Upload a YAML file with inertia parameters</small>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="vesselMass">Mass (kg)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="vesselMass" placeholder="Mass" value="1" min="0.1" step="0.1">
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                                <small class="text-muted">Vessel mass in kilograms</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="vesselBuoyancyMass">Buoyancy Mass (kg)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="vesselBuoyancyMass" placeholder="Buoyancy Mass" value="1" min="0.1" step="0.1">
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                                <small class="text-muted">Mass of displaced water (for buoyancy)</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="useDefaultInertia">
+                        <label class="form-check-label" for="useDefaultInertia">
+                            Use None for inertia matrix
+                        </label>
+                        <small class="d-block text-muted">Let the simulator calculate inertia based on geometry</small>
+                    </div>
+                    
+                    <div id="inertiaMatrixSection">
+                        <div class="form-group mb-4">
+                            <label>Inertia Matrix (kg⋅m²)</label>
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <div class="row mb-2">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>xx</sub></span>
+                                                <input type="number" class="form-control" id="inertia11" placeholder="I_xx" value="5" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>xy</sub></span>
+                                                <input type="number" class="form-control" id="inertia12" placeholder="I_xy" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>xz</sub></span>
+                                                <input type="number" class="form-control" id="inertia13" placeholder="I_xz" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>yx</sub></span>
+                                                <input type="number" class="form-control" id="inertia21" placeholder="I_yx" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>yy</sub></span>
+                                                <input type="number" class="form-control" id="inertia22" placeholder="I_yy" value="10" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>yz</sub></span>
+                                                <input type="number" class="form-control" id="inertia23" placeholder="I_yz" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>zx</sub></span>
+                                                <input type="number" class="form-control" id="inertia31" placeholder="I_zx" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>zy</sub></span>
+                                                <input type="number" class="form-control" id="inertia32" placeholder="I_zy" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">I<sub>zz</sub></span>
+                                                <input type="number" class="form-control" id="inertia33" placeholder="I_zz" value="10" step="0.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="text-muted">3×3 matrix of vessel moments and products of inertia (kg⋅m²). Diagonal elements (I<sub>xx</sub>, I<sub>yy</sub>, I<sub>zz</sub>) are usually larger than off-diagonal elements.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="useDefaultAddedMass" checked>
+                        <label class="form-check-label" for="useDefaultAddedMass">
+                            Use None for added mass matrix
+                        </label>
+                        <small class="d-block text-muted">Let the simulator calculate appropriate added mass values</small>
+                    </div>
+                    
+                    <div id="addedMassSection" style="display: none;">
+                        <div class="form-group mb-4">
+                            <label>Added Mass Matrix (kg⋅m²/s)</label>
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <div class="row mb-2">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>xx</sub></span>
+                                                <input type="number" class="form-control" id="addedMass11" placeholder="M_xx" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>xy</sub></span>
+                                                <input type="number" class="form-control" id="addedMass12" placeholder="M_xy" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>xz</sub></span>
+                                                <input type="number" class="form-control" id="addedMass13" placeholder="M_xz" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>yx</sub></span>
+                                                <input type="number" class="form-control" id="addedMass21" placeholder="M_yx" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>yy</sub></span>
+                                                <input type="number" class="form-control" id="addedMass22" placeholder="M_yy" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>yz</sub></span>
+                                                <input type="number" class="form-control" id="addedMass23" placeholder="M_yz" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>zx</sub></span>
+                                                <input type="number" class="form-control" id="addedMass31" placeholder="M_zx" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>zy</sub></span>
+                                                <input type="number" class="form-control" id="addedMass32" placeholder="M_zy" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text">M<sub>zz</sub></span>
+                                                <input type="number" class="form-control" id="addedMass33" placeholder="M_zz" value="0" step="0.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="text-muted">3×3 matrix representing the added mass effect from fluid dynamics (kg⋅m²/s). Diagonal terms are typically positive.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <h6>Hint: Common inertia values</h6>
+                        <ul class="mb-0" style="font-size: 12px;">
+                            <li>For a cylinder along x-axis: I<sub>xx</sub> = mr²/2, I<sub>yy</sub> = I<sub>zz</sub> = m(3r² + L²)/12</li>
+                            <li>For a sphere: I<sub>xx</sub> = I<sub>yy</sub> = I<sub>zz</sub> = 2mr²/5</li>
+                            <li>For a rectangular prism: I<sub>xx</sub> = m(b² + c²)/12, I<sub>yy</sub> = m(a² + c²)/12, I<sub>zz</sub> = m(a² + b²)/12</li>
+                            <li>Off-diagonal terms (products of inertia) are typically zero for symmetric bodies</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveInertia">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for editing geometry parameters -->
+    <div class="modal fade" id="geometryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Geometry Parameters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label for="geometryFileUpload">Upload Geometry File</label>
+                        <input type="file" class="form-control" id="geometryFileUpload" accept=".yml,.yaml">
+                        <small class="text-muted">Upload a YAML file with geometry parameters</small>
+                    </div>
+                    
+                    <div class="alert alert-info" id="gdfFileInfo" style="display:none;">
+                        <i class="bi bi-info-circle"></i> Dimensions detected from GDF file have been loaded.
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="vesselLength">Length (m)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="vesselLength" placeholder="Length" value="1.0" min="0.1" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="vesselBreadth">Breadth (m)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="vesselBreadth" placeholder="Breadth" value="0.5" min="0.1" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="vesselDepth">Depth (m)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="vesselDepth" placeholder="Depth" value="0.5" min="0.1" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Axis Direction Configuration</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small">Select which axis corresponds to Length, Breadth, and Depth in your coordinate system.</p>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="lengthAxis">Length Axis</label>
+                                        <select class="form-control" id="lengthAxis">
+                                            <option value="x" selected>X-axis</option>
+                                            <option value="y">Y-axis</option>
+                                            <option value="z">Z-axis</option>
+                                        </select>
+                                        <small class="text-muted">Main vessel axis (bow to stern)</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="breadthAxis">Breadth Axis</label>
+                                        <select class="form-control" id="breadthAxis">
+                                            <option value="x">X-axis</option>
+                                            <option value="y" selected>Y-axis</option>
+                                            <option value="z">Z-axis</option>
+                                        </select>
+                                        <small class="text-muted">Side-to-side vessel width</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="depthAxis">Depth Axis</label>
+                                        <select class="form-control" id="depthAxis">
+                                            <option value="x">X-axis</option>
+                                            <option value="y">Y-axis</option>
+                                            <option value="z" selected>Z-axis</option>
+                                        </select>
+                                        <small class="text-muted">Top-to-bottom vessel height</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="gyrationX">Gyration X (kx)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="gyrationX" placeholder="X" value="1.0" min="0.1" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="gyrationY">Gyration Y (ky)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="gyrationY" placeholder="Y" value="1.0" min="0.1" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="gyrationZ">Gyration Z (kz)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="gyrationZ" placeholder="Z" value="1.0" min="0.1" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Center of Origin [x, y, z]</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="coX" placeholder="X" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="coY" placeholder="Y" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="coZ" placeholder="Z" value="0" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                                <label class="mt-2">CO Orientation [roll, pitch, yaw]</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="coRoll" placeholder="Roll" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="coPitch" placeholder="Pitch" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="coYaw" placeholder="Yaw" value="0" step="0.1">
+                                    <span class="input-group-text">°</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Center of Gravity [x, y, z]</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="cgX" placeholder="X" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="cgY" placeholder="Y" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="cgZ" placeholder="Z" value="0" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                                <label class="mt-2">CG Orientation [roll, pitch, yaw]</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="cgRoll" placeholder="Roll" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="cgPitch" placeholder="Pitch" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="cgYaw" placeholder="Yaw" value="0" step="0.1">
+                                    <span class="input-group-text">°</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Center of Buoyancy [x, y, z]</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="cbX" placeholder="X" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="cbY" placeholder="Y" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="cbZ" placeholder="Z" value="0" step="0.1">
+                                    <span class="input-group-text">m</span>
+                                </div>
+                                <label class="mt-2">CB Orientation [roll, pitch, yaw]</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="cbRoll" placeholder="Roll" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="cbPitch" placeholder="Pitch" value="0" step="0.1">
+                                    <input type="number" class="form-control" id="cbYaw" placeholder="Yaw" value="0" step="0.1">
+                                    <span class="input-group-text">°</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="geometryFilePath">Geometry File Path</label>
+                        <input type="text" class="form-control" id="geometryFilePath" placeholder="/workspaces/mavlab/inputs/vesselname/HydRA/input/vessel.gdf">
+                        <small class="text-muted">Path to the GDF file used for hydrodynamic calculations</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveGeometry">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add a modal for the fullscreen map -->
+    <div class="modal fade" id="fullscreenMapModal" tabindex="-1" aria-labelledby="fullscreenMapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fullscreenMapModalLabel">Geofence Map</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-2">
+                    <div id="fullscreen-geofence-map" style="height: calc(100vh - 130px); width: 100%; border-radius: 4px;"></div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-primary" id="fullscreenSetGpsDatum">
+                            <i class="bi bi-geo-alt"></i> Set GPS Datum
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="fullscreenClearGeofence">
+                            <i class="bi bi-trash"></i> Clear Geofence
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                        <i class="bi bi-check-lg"></i> Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for agent configuration -->
+    <div class="modal fade" id="agentConfigModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agentConfigModalTitle">Add Agent</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="agentConfigIndex" value="-1">
+                    <div class="form-group mb-3">
+                        <label for="agentName">Agent Name</label>
+                        <input type="text" class="form-control" id="agentName" placeholder="Enter agent name">
+                        <small class="text-muted">Used for directory naming in configuration</small>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="agentType">Agent Type</label>
+                        <select class="form-control" id="agentType">
+                            <option value="auv">AUV</option>
+                            <option value="usv">USV</option>
+                            <option value="ship">Ship</option>
+                            <option value="rov">ROV</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="agentCustomPaths" value="0">
+                            <label class="form-check-label" for="agentCustomPaths">
+                                Use custom file paths
+                            </label>
+                        </div>
+                    </div>
+                    <div id="agentCustomPathsContainer" style="display: none;">
+                        <div class="form-group mb-2">
+                            <label for="agentGeometryPath">Geometry Path</label>
+                            <input type="text" class="form-control" id="agentGeometryPath" placeholder="/workspaces/mavlab/inputs/{name}/geometry.yml">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="agentInertiaPath">Inertia Path</label>
+                            <input type="text" class="form-control" id="agentInertiaPath" placeholder="/workspaces/mavlab/inputs/{name}/inertia.yml">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="agentHydroPath">Hydrodynamics Path</label>
+                            <input type="text" class="form-control" id="agentHydroPath" placeholder="/workspaces/mavlab/inputs/{name}/hydrodynamics.yml">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="agentControlSurfacesPath">Control Surfaces Path</label>
+                            <input type="text" class="form-control" id="agentControlSurfacesPath" placeholder="/workspaces/mavlab/inputs/{name}/control_surfaces.yml">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="agentInitialConditionsPath">Initial Conditions Path</label>
+                            <input type="text" class="form-control" id="agentInitialConditionsPath" placeholder="/workspaces/mavlab/inputs/{name}/initial_conditions.yml">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="agentSensorsPath">Sensors Path</label>
+                            <input type="text" class="form-control" id="agentSensorsPath" placeholder="/workspaces/mavlab/inputs/{name}/sensors.yml">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="agentGuidancePath">Guidance Path</label>
+                            <input type="text" class="form-control" id="agentGuidancePath" placeholder="/workspaces/mavlab/inputs/{name}/guidance.yml">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="agentControlPath">Control Path</label>
+                            <input type="text" class="form-control" id="agentControlPath" placeholder="/workspaces/mavlab/inputs/{name}/control.yml">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="agentThrustersPath">Thrusters Path</label>
+                            <input type="text" class="form-control" id="agentThrustersPath" placeholder="/workspaces/mavlab/inputs/{name}/thrusters.yml">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveAgentConfig">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="js/vessel-model.js"></script>
+    <script src="js/yaml-generator.js"></script>
+    <script src="js/gdf-loader.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/three-setup.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Add this script to toggle visibility of location/orientation fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const sensorTypeSelect = document.getElementById('sensorType');
+            const sensorNoneLocation = document.getElementById('sensorNoneLocation');
+            const sensorNoneOrientation = document.getElementById('sensorNoneOrientation');
+            const sensorLocationGroup = document.getElementById('sensorLocationGroup');
+            const sensorOrientationGroup = document.getElementById('sensorOrientationGroup');
+            
+            // Auto-check None for encoders type
+            sensorTypeSelect?.addEventListener('change', function() {
+                if (this.value === 'encoders') {
+                    sensorNoneLocation.checked = true;
+                    sensorNoneOrientation.checked = true;
+                    sensorLocationGroup.style.display = 'none';
+                    sensorOrientationGroup.style.display = 'none';
+                } else {
+                    sensorNoneLocation.checked = false;
+                    sensorNoneOrientation.checked = false;
+                    sensorLocationGroup.style.display = 'block';
+                    sensorOrientationGroup.style.display = 'block';
+                }
+            });
+            
+            // Toggle visibility based on checkboxes
+            sensorNoneLocation?.addEventListener('change', function() {
+                sensorLocationGroup.style.display = this.checked ? 'none' : 'block';
+            });
+            
+            sensorNoneOrientation?.addEventListener('change', function() {
+                sensorOrientationGroup.style.display = this.checked ? 'none' : 'block';
+            });
+        });
+
+        // Add this script to toggle visibility of location/orientation fields for FBX sensor
+        document.addEventListener('DOMContentLoaded', function() {
+            const fbxSensorTypeSelect = document.getElementById('fbxSensorType');
+            const fbxSensorNoneLocation = document.getElementById('fbxSensorNoneLocation');
+            const fbxSensorNoneOrientation = document.getElementById('fbxSensorNoneOrientation');
+            const fbxSensorOrientationGroup = document.getElementById('fbxSensorOrientationGroup');
+            
+            // Auto-check None for encoders type
+            fbxSensorTypeSelect?.addEventListener('change', function() {
+                if (this.value === 'encoders') {
+                    fbxSensorNoneLocation.checked = true;
+                    fbxSensorNoneOrientation.checked = true;
+                    fbxSensorOrientationGroup.style.display = 'none';
+                } else {
+                    fbxSensorNoneLocation.checked = false;
+                    fbxSensorNoneOrientation.checked = false;
+                    fbxSensorOrientationGroup.style.display = 'block';
+                }
+            });
+            
+            // Toggle visibility based on checkboxes
+            fbxSensorNoneOrientation?.addEventListener('change', function() {
+                fbxSensorOrientationGroup.style.display = this.checked ? 'none' : 'block';
+            });
+        });
+    </script>
+</body>
+</html> 

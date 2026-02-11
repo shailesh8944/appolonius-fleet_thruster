@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Dynamics – Pani Simulator</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../rawFiles/Navigation/sensors.html" rel="next">
+<link href="../../rawFiles/Kinematics/Kinematics.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-de84f8d6bb715db06a919283c2d1e787.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-9a023c9ade86a60361e96e3e3f11bc54.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-7db324b88d23813ba50d10228a5600f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4a1d4c259b44775fcef54614c9851e3a.min.css" rel="prefetch" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../rawFiles/Dynamics/Dynamics.html">Dynamics</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Pani Simulator</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/goldenrishabh/panisim" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pani Simulator</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../rawFiles/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../rawFiles/quickstart.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Quickstart</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../rawFiles/Kinematics/Kinematics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kinematics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../rawFiles/Dynamics/Dynamics.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Dynamics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../rawFiles/Navigation/sensors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sensors Simulation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../rawFiles/Inputs/inputs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simualtion Inputs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../rawFiles/ROS2/ros2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ROS2 Architecture</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../rawFiles/WebConfigurator/web_configurator.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vessel Configurator</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#state-representation" id="toc-state-representation" class="nav-link" data-scroll-target="#state-representation">State Representation</a></li>
+  <li><a href="#components-of-the-dynamic-equation" id="toc-components-of-the-dynamic-equation" class="nav-link" data-scroll-target="#components-of-the-dynamic-equation">Components of the Dynamic Equation</a>
+  <ul class="collapse">
+  <li><a href="#mass-matrix-m" id="toc-mass-matrix-m" class="nav-link" data-scroll-target="#mass-matrix-m">Mass Matrix (<span class="math inline">\(M\)</span>)</a></li>
+  <li><a href="#coriolis-and-centripetal-matrix" id="toc-coriolis-and-centripetal-matrix" class="nav-link" data-scroll-target="#coriolis-and-centripetal-matrix">Coriolis and Centripetal Matrix</a></li>
+  <li><a href="#damping-matrix" id="toc-damping-matrix" class="nav-link" data-scroll-target="#damping-matrix">Damping Matrix</a></li>
+  <li><a href="#restoring-forces" id="toc-restoring-forces" class="nav-link" data-scroll-target="#restoring-forces">Restoring Forces</a></li>
+  <li><a href="#control-forces" id="toc-control-forces" class="nav-link" data-scroll-target="#control-forces">Control Forces</a></li>
+  </ul></li>
+  <li><a href="#vessel-ode-and-simulation" id="toc-vessel-ode-and-simulation" class="nav-link" data-scroll-target="#vessel-ode-and-simulation">Vessel ODE and Simulation</a></li>
+  <li><a href="#helper-methods-and-utilities" id="toc-helper-methods-and-utilities" class="nav-link" data-scroll-target="#helper-methods-and-utilities">Helper Methods and Utilities</a>
+  <ul class="collapse">
+  <li><a href="#dimensionalization" id="toc-dimensionalization" class="nav-link" data-scroll-target="#dimensionalization">Dimensionalization</a></li>
+  <li><a href="#hydrodynamic-coefficient-calculation" id="toc-hydrodynamic-coefficient-calculation" class="nav-link" data-scroll-target="#hydrodynamic-coefficient-calculation">Hydrodynamic Coefficient Calculation</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/goldenrishabh/panisim/edit/main/rawFiles/Dynamics/Dynamics.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goldenrishabh/panisim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Dynamics</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>The Dynamics modules (<code>class_vessel.py</code> and <code>calculate_hydrodynamics.py</code>) implement the mathematical foundation for simulating the motion of marine vehicles through water. The simulator uses Fossen’s nonlinear 6-DOF equation of motion:</p>
+<p><span class="math display">\[M\dot{\nu}+C(\nu)\nu+D(\nu)\nu+g(\eta) = \tau\]</span></p>
+<p>where,</p>
+<ul>
+<li><span class="math inline">\(M = M_{RB} + M_A\)</span> is the mass matrix, combining rigid body mass <span class="math inline">\(M_{RB}\)</span> and added mass <span class="math inline">\(M_A\)</span></li>
+<li><span class="math inline">\(C(\nu) = C_{RB}(\nu) + C_A(\nu)\)</span> is the Coriolis and centripetal matrix</li>
+<li><span class="math inline">\(D(\nu)\)</span> is the hydrodynamic damping matrix</li>
+<li><span class="math inline">\(g(\eta)\)</span> is the gravitational and buoyancy force vector</li>
+<li><span class="math inline">\(\tau\)</span> is the control force vector from thrusters and control surfaces</li>
+<li><span class="math inline">\(\nu = [u, v, w, p, q, r]^T\)</span> is the velocity vector in the body frame</li>
+<li><span class="math inline">\(\eta = [x, y, z, \phi, \theta, \psi]^T\)</span> is the position and orientation vector</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The dynamics modules serve as the core of the simulation, determining how forces and moments translate into vessel motion through water.</p>
+</div>
+</div>
+</section>
+<section id="state-representation" class="level2">
+<h2 class="anchored" data-anchor-id="state-representation">State Representation</h2>
+<p>The vessel state is represented as a vector combining velocities, position, orientation, control surface angles, and thruster states:</p>
+<p><span class="math inline">\(\text{state} = [\nu^T, \eta_{pos}^T, \eta_{rot}^T, \delta^T, n^T]^T\)</span></p>
+<p>Where: - <span class="math inline">\(\nu = [u, v, w, p, q, r]^T\)</span> are the linear and angular velocities in the body frame - <span class="math inline">\(\eta_{pos} = [x, y, z]^T\)</span> is the position in the NED frame - <span class="math inline">\(\eta_{rot}\)</span> is the orientation, either as Euler angles <span class="math inline">\([\phi, \theta, \psi]^T\)</span> or quaternion <span class="math inline">\([q_0, q_1, q_2, q_3]^T\)</span> - <span class="math inline">\(\delta\)</span> is the vector of control surface angles - <span class="math inline">\(n\)</span> is the vector of thruster rotational speeds (RPM)</p>
+</section>
+<section id="components-of-the-dynamic-equation" class="level2">
+<h2 class="anchored" data-anchor-id="components-of-the-dynamic-equation">Components of the Dynamic Equation</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">graph TD
+    A[Mass Matrix M] --&gt; EOM[Equation of Motion]
+    B[Coriolis Matrix C] --&gt; EOM
+    C[Damping Matrix D] --&gt; EOM
+    D[Restoring Forces g] --&gt; EOM
+    E[Control Forces τ] --&gt; EOM
+    EOM --&gt; ODE[vessel_ode]
+    ODE --&gt; IV[solve_ivp]
+    IV --&gt; ST[Vessel State]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<section id="mass-matrix-m" class="level3">
+<h3 class="anchored" data-anchor-id="mass-matrix-m">Mass Matrix (<span class="math inline">\(M\)</span>)</h3>
+<p>The mass matrix <span class="math inline">\(M\)</span> combines the rigid-body inertia matrix <span class="math inline">\(M_{RB}\)</span> and the added mass matrix <span class="math inline">\(M_A\)</span>:</p>
+<p><span class="math display">\[M = M_{RB} + M_A\]</span></p>
+<section id="rigid-body-mass-matrix-m_rb" class="level4">
+<h4 class="anchored" data-anchor-id="rigid-body-mass-matrix-m_rb">Rigid-body Mass Matrix (<span class="math inline">\(M_{RB}\)</span>)</h4>
+<p>The rigid-body mass matrix is generated in the <code>_generate_mass_matrix</code> method in <code>calculate_hydrodynamics.py</code>:</p>
+<p><span class="math display">\[M_{RB} = \begin{bmatrix} m I_{3 \times 3} &amp; -m S(r_G) \\ m S(r_G) &amp; I_G \end{bmatrix}\]</span></p>
+<p>Where: - <span class="math inline">\(m\)</span> is the vessel mass - <span class="math inline">\(I_{3 \times 3}\)</span> is the 3×3 identity matrix - <span class="math inline">\(r_G\)</span> is the center of gravity vector relative to the origin of the body frame - <span class="math inline">\(S(r_G)\)</span> is the skew-symmetric matrix of <span class="math inline">\(r_G\)</span> (implemented by <code>Smat()</code> in <code>module_kinematics.py</code>) - <span class="math inline">\(I_G\)</span> is the inertia tensor calculated from the radii of gyration</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _generate_mass_matrix(<span class="va">self</span>, CG, mass, gyration):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate gyration tensor about vessel frame</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    xprdct2 <span class="op">=</span> np.diag(gyration)<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> Smat(CG)<span class="op">@</span>Smat(CG)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generate the inertia matrix using radii of gyration</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    inertia_matrix <span class="op">=</span> xprdct2 <span class="op">*</span> mass</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generate the mass matrix</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    mass_matrix <span class="op">=</span> np.zeros((<span class="dv">6</span>,<span class="dv">6</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    mass_matrix[<span class="dv">0</span>:<span class="dv">3</span>][:, <span class="dv">0</span>:<span class="dv">3</span>] <span class="op">=</span> mass <span class="op">*</span> np.eye(<span class="dv">3</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    mass_matrix[<span class="dv">3</span>:<span class="dv">6</span>][:, <span class="dv">3</span>:<span class="dv">6</span>] <span class="op">=</span> inertia_matrix</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    mass_matrix[<span class="dv">0</span>:<span class="dv">3</span>][:, <span class="dv">3</span>:<span class="dv">6</span>] <span class="op">=</span> <span class="op">-</span>Smat(CG) <span class="op">*</span> mass</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    mass_matrix[<span class="dv">3</span>:<span class="dv">6</span>][:, <span class="dv">0</span>:<span class="dv">3</span>] <span class="op">=</span> Smat(CG) <span class="op">*</span> mass</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mass_matrix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="added-mass-matrix-m_a" class="level4">
+<h4 class="anchored" data-anchor-id="added-mass-matrix-m_a">Added Mass Matrix (<span class="math inline">\(M_A\)</span>)</h4>
+<p>The added mass matrix represents the added inertia due to accelerating the surrounding fluid. It’s calculated from hydrodynamic data obtained from <a href="https://hydra.hydratech.in/">HydRA</a> (You can also enter custom hydrodynamics added mass coefficients (example Y_vd) in the <code>hydrodynamics.yml</code> input file instead of using HydRA, as discussed in the <a href="../../rawFiles/Inputs/inputs.html">Inputs</a> section).</p>
+<p><span class="math display">\[M_A = \begin{bmatrix} A_{11} &amp; A_{12} \\ A_{21} &amp; A_{22} \end{bmatrix}\]</span></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>calculate_added_mass_from_hydra(hydra_file)</code></td>
+<td>Computes the added mass matrix from HydRA data file containing frequency-dependent hydrodynamic coefficients. Extracts zero-frequency added mass for most terms, but computes heave, roll, and pitch terms at their natural frequencies for better accuracy.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calculate_added_mass_from_hydra(<span class="va">self</span>, hydra_file):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Load hydrodynamic data</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(hydra_file, <span class="st">'r'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        mdict <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract arrays from data</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    omg <span class="op">=</span> np.array(mdict[<span class="st">'w'</span>])      <span class="co"># Frequency array</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    AM <span class="op">=</span> np.array(mdict[<span class="st">'AM'</span>])      <span class="co"># Added mass array</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract zero-frequency added mass</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    A_zero <span class="op">=</span> AM[<span class="dv">1</span>, :, :, <span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate natural frequencies and</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># interpolate added mass at those frequencies</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return properly transformed added mass matrix</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> A</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The added mass calculated from HydRA is in ENU frame and so it is converted to NED frame in the <code>calculate_added_mass_from_hydra</code> function.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="coriolis-and-centripetal-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="coriolis-and-centripetal-matrix">Coriolis and Centripetal Matrix</h3>
+<p>The Coriolis matrix (<span class="math inline">\(C(\nu)\)</span>) accounts for forces arising from motion in a rotating reference frame (Body frame is rotating with respect to NED frame):</p>
+<p><span class="math display">\[C(\nu) = C_{RB}(\nu) + C_A(\nu)\]</span></p>
+<p>These matrices are calculated using:</p>
+<p><span class="math display">\[C_{RB}(\nu) = \begin{bmatrix} 0_{3 \times 3} &amp; -S(M_{11} v_1 + M_{12} v_2) \\
+-S(M_{11} v_1 + M_{12} v_2) &amp; -S(M_{21} v_1 + M_{22} v_2) \end{bmatrix}\]</span></p>
+<p><span class="math display">\[C_A(\nu) = \begin{bmatrix} 0_{3 \times 3} &amp; -S(A_{11} v_1 + A_{12} v_2) \\
+-S(A_{11} v_1 + A_{12} v_2) &amp; -S(A_{21} v_1 + A_{22} v_2) \end{bmatrix}\]</span></p>
+<p>Where <span class="math inline">\(v_1 = [u, v, w]^T\)</span> and <span class="math inline">\(v_2 = [p, q, r]^T\)</span> are the linear and angular velocity components of <span class="math inline">\(\nu\)</span>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>calculate_coriolis_matrices(vel)</code></td>
+<td>Computes the rigid body and added mass Coriolis-centripetal matrices based on the current velocity state. Returns a tuple of <span class="math inline">\((C_{RB}, C_A)\)</span> matrices.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="damping-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="damping-matrix">Damping Matrix</h3>
+<p>The damping matrix (<span class="math inline">\(D(\nu)\)</span>) represents hydrodynamic resistance forces and is typically modeled as:</p>
+<p><span class="math display">\[D(\nu) = D_{linear} + D_{nonlinear}(\nu)\]</span></p>
+<p>In the implementation, damping is handled through hydrodynamic coefficients (entered in the <code>hydrodynamics.yml</code> input file) rather than an explicit matrix:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>hydrodynamic_forces(vel)</code></td>
+<td>Computes hydrodynamic damping forces by applying coefficients to velocity components. Supports linear, quadratic, and cross-terms.</td>
+</tr>
+<tr class="even">
+<td><code>cross_flow_drag()</code></td>
+<td>Estimates sway-yaw damping coefficients for surface vessels using strip theory and Hoerner’s cross-flow drag.</td>
+</tr>
+<tr class="odd">
+<td><code>cross_flow_drag_AUV()</code></td>
+<td>Similar to <code>cross_flow_drag()</code> but includes heave-pitch calculations for AUVs.</td>
+</tr>
+<tr class="even">
+<td><code>hoerner()</code></td>
+<td>Implements Hoerner’s method for computing 2D drag coefficients based on section beam-to-draft ratio.</td>
+</tr>
+</tbody>
+</table>
+<p>The coefficients follow a naming convention that indicates which force/moment they affect and which velocity components are involved (you can enter any custom hydrodynamic coefficients in the <code>hydrodynamics.yml</code> input file and it will be handled by the function for force calculations):</p>
+<ul>
+<li>Linear damping: <code>X_u</code>, <code>Y_v</code>, <code>Z_w</code>, <code>K_p</code>, <code>M_q</code>, <code>N_r</code></li>
+<li>Quadratic damping: <code>X_u_au</code>, <code>Y_v_av</code>, <code>Z_w_aw</code>, etc. (the <code>a</code> indicates absolute value)</li>
+<li>Cross-coupling: <code>X_vr</code>, <code>Y_ur</code>, <code>N_uv</code>, etc.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hydrodynamic_forces(<span class="va">self</span>, vel):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract velocities</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    u, v, w, p, q, r <span class="op">=</span> vel</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize forces vector</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    F <span class="op">=</span> np.zeros(<span class="dv">6</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Map velocity components to values</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    vel_map <span class="op">=</span> {<span class="st">'u'</span>: u, <span class="st">'v'</span>: v, <span class="st">'w'</span>: w, <span class="st">'p'</span>: p, <span class="st">'q'</span>: q, <span class="st">'r'</span>: r}</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Process each hydrodynamic coefficient</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> coeff_name, coeff_value <span class="kw">in</span> <span class="va">self</span>.hydrodynamics.items():</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> coeff_value <span class="op">==</span> <span class="dv">0</span>: <span class="cf">continue</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        parts <span class="op">=</span> coeff_name.split(<span class="st">'_'</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        force_dir <span class="op">=</span> parts[<span class="dv">0</span>]</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> force_dir <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>.force_indices: <span class="cf">continue</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate force contribution</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        force <span class="op">=</span> coeff_value</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> component <span class="kw">in</span> parts[<span class="dv">1</span>:]:</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> component.startswith(<span class="st">'a'</span>) <span class="kw">and</span> <span class="bu">len</span>(component) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Absolute value term (e.g., u|u|)</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>                v_char <span class="op">=</span> component[<span class="dv">1</span>:]</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>                force <span class="op">*=</span> <span class="bu">abs</span>(vel_map[v_char])</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> component <span class="kw">in</span> vel_map:</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Regular term</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>                force <span class="op">*=</span> vel_map[component]</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add to force vector</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        F[<span class="va">self</span>.force_indices[force_dir]] <span class="op">+=</span> force</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> F</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="restoring-forces" class="level3">
+<h3 class="anchored" data-anchor-id="restoring-forces">Restoring Forces</h3>
+<p>The restoring forces (<span class="math inline">\(g(\eta)\)</span>) include gravitational and buoyancy effects:</p>
+<p><span class="math display">\[g(\eta) = \begin{bmatrix}
+(W - B) \sin \theta \\
+-(W - B) \cos \theta \sin \phi \\
+-(W - B) \cos \theta \cos \phi \\
+-(y_G W - y_B B) \cos \theta \cos \phi + (z_G W - z_B B) \cos \theta \sin \phi \\
+(z_G W - z_B B) \sin \theta + (x_G W - x_B B) \cos \theta \cos \phi \\
+-(x_G W - x_B B) \cos \theta \sin \phi - (y_G W - y_B B) \sin \theta
+\end{bmatrix}\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(W = mg\)</span> is the weight</li>
+<li><span class="math inline">\(B = \rho g \nabla\)</span> is the buoyancy force (with <span class="math inline">\(\nabla\)</span> being the displaced volume)</li>
+<li><span class="math inline">\(r_G = [x_G, y_G, z_G]^T\)</span> is the center of gravity mentioned in the <code>geometry.yml</code> input file</li>
+<li><span class="math inline">\(r_B = [x_B, y_B, z_B]^T\)</span> is the center of buoyancy mentioned in the <code>geometry.yml</code> input file</li>
+</ul>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>gravitational_forces(phi, theta)</code></td>
+<td>Computes the gravitational and buoyancy forces and moments as a function of roll and pitch angles.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="control-forces" class="level3">
+<h3 class="anchored" data-anchor-id="control-forces">Control Forces</h3>
+<p>The control forces vector <span class="math inline">\(\tau\)</span> represents the combined effect of control surfaces and thrusters.#### Control Surface Forces</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>control_forces(delta)</code></td>
+<td>Calculates forces and moments generated by control surfaces (rudders, fins, etc.) based on their deflection angles <span class="math inline">\(\delta\)</span>. Supports both hydrodynamic coefficient-based and aerofoil-based calculation methods.</td>
+</tr>
+</tbody>
+</table>
+<p>For hydrodynamic coefficient-based calculation: - Forces are calculated as <span class="math inline">\(\tau_i = C_{i\delta} \delta\)</span>, where <span class="math inline">\(C_{i\delta}\)</span> is the control coefficient mentioned in the <code>control_surface_hydrodynamics</code> in the <code>control_surfaces.yml</code> input file</p>
+<p>For aerofoil-based calculation:</p>
+<ul>
+<li>Local velocity at the control surface is calculated considering vessel motion (automatically done)</li>
+<li>Angle of attack is determined from flow direction and surface deflection</li>
+<li>Lift and drag forces are calculated using NACA airfoil data (path to the NACA file is mentioned in the <code>control_surfaces.yml</code> input file)</li>
+<li>Forces are transformed to the body frame and a generalized force vector is returned</li>
+</ul>
+<section id="thruster-forces" class="level4">
+<h4 class="anchored" data-anchor-id="thruster-forces">Thruster Forces</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>thruster_forces(n_prop)</code></td>
+<td>Calculates forces and moments from propellers/thrusters based on their rotational speeds <span class="math inline">\(n\)</span> in RPM. Models thrust using propeller theory with advance ratio and thrust coefficients.</td>
+</tr>
+</tbody>
+</table>
+<p>The thrust calculation follows the form: <span class="math display">\[X_{prop} = K_T \rho D^4 |n| n\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(K_T\)</span> is the thrust coefficient (approximated as <span class="math inline">\(K_{T,J=0}(1-J)\)</span> with <span class="math inline">\(J\)</span> being the advance ratio)</li>
+<li><span class="math inline">\(\rho\)</span> is the water density</li>
+<li><span class="math inline">\(D\)</span> is the propeller diameter</li>
+<li><span class="math inline">\(n\)</span> is the propeller speed in revolutions per second</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="vessel-ode-and-simulation" class="level2">
+<h2 class="anchored" data-anchor-id="vessel-ode-and-simulation">Vessel ODE and Simulation</h2>
+<p>The vessel dynamics are implemented as an ordinary differential equation (ODE) in the <code>vessel_ode(t, state)</code> method, which computes the state derivatives:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> vessel_ode(<span class="va">self</span>, t, state):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract state components</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    vel <span class="op">=</span> state[<span class="dv">0</span>:<span class="dv">6</span>]  <span class="co"># [u, v, w, p, q, r]</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    pos <span class="op">=</span> state[<span class="dv">6</span>:<span class="dv">9</span>]  <span class="co"># [x, y, z]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    angles <span class="op">=</span> state[<span class="dv">9</span>:attitude_end]  <span class="co"># [phi, theta, psi] or quaternion</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate forces and moments</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    F_hyd <span class="op">=</span> <span class="va">self</span>.hydrodynamic_forces(vel)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    F_control <span class="op">=</span> <span class="va">self</span>.control_forces(state[control_start:thruster_start])</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    F_thrust <span class="op">=</span> <span class="va">self</span>.thruster_forces(state[thruster_start:])</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    F_g <span class="op">=</span> <span class="va">self</span>.gravitational_forces(angles[<span class="dv">0</span>], angles[<span class="dv">1</span>])</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="va">self</span>.coriolis_flag:</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        C_RB, C_A <span class="op">=</span> <span class="va">self</span>.calculate_coriolis_matrices(vel)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        F_C <span class="op">=</span> (C_RB <span class="op">+</span> C_A) <span class="op">@</span> vel</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        F_C <span class="op">=</span> np.zeros(<span class="dv">6</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Total force</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    F <span class="op">=</span> F_hyd <span class="op">+</span> F_control <span class="op">+</span> F_thrust <span class="op">-</span> F_g <span class="op">-</span> F_C</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate velocity derivatives</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    M <span class="op">=</span> <span class="va">self</span>.mass_matrix <span class="op">+</span> <span class="va">self</span>.added_mass_matrix  <span class="co"># Total mass matrix</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    state_dot[<span class="dv">0</span>:<span class="dv">6</span>] <span class="op">=</span> np.linalg.inv(M) <span class="op">@</span> F</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate position and attitude derivatives</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> state_dot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>step()</code></td>
+<td>Advances the simulation by one time step by solving the ODE using SciPy’s <code>solve_ivp</code>.</td>
+</tr>
+<tr class="even">
+<td><code>simulate()</code></td>
+<td>Runs the full simulation by repeatedly calling <code>step()</code> until the final time.</td>
+</tr>
+<tr class="odd">
+<td><code>reset()</code></td>
+<td>Resets the vessel to its initial state.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="helper-methods-and-utilities" class="level2">
+<h2 class="anchored" data-anchor-id="helper-methods-and-utilities">Helper Methods and Utilities</h2>
+<section id="dimensionalization" class="level3">
+<h3 class="anchored" data-anchor-id="dimensionalization">Dimensionalization</h3>
+<p>Hydrodynamic coefficients can be provided in non-dimensional form and converted to dimensional form:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>_dimensionalize_coefficients(rho, L, U)</code></td>
+<td>Converts non-dimensional hydrodynamic coefficients to dimensional form based on density <span class="math inline">\(\rho\)</span>, length <span class="math inline">\(L\)</span>, and characteristic velocity <span class="math inline">\(U\)</span> (mentioned in the <code>simulation_input.yml</code> file)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="hydrodynamic-coefficient-calculation" class="level3">
+<h3 class="anchored" data-anchor-id="hydrodynamic-coefficient-calculation">Hydrodynamic Coefficient Calculation</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>calculate_added_mass_from_hydra(hydra_file)</code></td>
+<td>Calculates the added mass matrix from HydRA data files.</td>
+</tr>
+<tr class="even">
+<td><code>cross_flow_drag()</code></td>
+<td>Estimates sway-yaw hydrodynamic coefficients using strip theory.</td>
+</tr>
+<tr class="odd">
+<td><code>cross_flow_drag_AUV()</code></td>
+<td>Estimates both sway-yaw and heave-pitch coefficients for underwater vehicles.</td>
+</tr>
+<tr class="even">
+<td><code>hoerner()</code></td>
+<td>Implements Hoerner’s method for 2D section drag coefficient calculation.</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Understanding these dynamics components is essential for correctly configuring vessel parameters and interpreting simulation results. The implementation allows for flexible modeling of different vessel types by adjusting the parameters and coefficients.</p>
+</div>
+</div>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../rawFiles/Kinematics/Kinematics.html" class="pagination-link" aria-label="Kinematics">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Kinematics</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../rawFiles/Navigation/sensors.html" class="pagination-link" aria-label="Sensors Simulation">
+        <span class="nav-page-text">Sensors Simulation</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb5" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Dynamics {.unnumbered}</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>The Dynamics modules (<span class="in">`class_vessel.py`</span> and <span class="in">`calculate_hydrodynamics.py`</span>) implement the mathematical foundation for simulating the motion of marine vehicles through water. The simulator uses Fossen's nonlinear 6-DOF equation of motion:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>$$M\dot{\nu}+C(\nu)\nu+D(\nu)\nu+g(\eta) = \tau$$</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>where,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$M = M_{RB} + M_A$ is the mass matrix, combining rigid body mass $M_{RB}$ and added mass $M_A$</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$C(\nu) = C_{RB}(\nu) + C_A(\nu)$ is the Coriolis and centripetal matrix</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$D(\nu)$ is the hydrodynamic damping matrix</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$g(\eta)$ is the gravitational and buoyancy force vector</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\tau$ is the control force vector from thrusters and control surfaces</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\nu = <span class="co">[</span><span class="ot">u, v, w, p, q, r</span><span class="co">]</span>^T$ is the velocity vector in the body frame</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\eta = <span class="co">[</span><span class="ot">x, y, z, \phi, \theta, \psi</span><span class="co">]</span>^T$ is the position and orientation vector</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>The dynamics modules serve as the core of the simulation, determining how forces and moments translate into vessel motion through water.</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## State Representation</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>The vessel state is represented as a vector combining velocities, position, orientation, control surface angles, and thruster states:</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>$\text{state} = <span class="co">[</span><span class="ot">\nu^T, \eta_{pos}^T, \eta_{rot}^T, \delta^T, n^T</span><span class="co">]</span>^T$</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>Where:</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\nu = <span class="co">[</span><span class="ot">u, v, w, p, q, r</span><span class="co">]</span>^T$ are the linear and angular velocities in the body frame</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\eta_{pos} = <span class="co">[</span><span class="ot">x, y, z</span><span class="co">]</span>^T$ is the position in the NED frame</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\eta_{rot}$ is the orientation, either as Euler angles $<span class="co">[</span><span class="ot">\phi, \theta, \psi</span><span class="co">]</span>^T$ or quaternion $<span class="co">[</span><span class="ot">q_0, q_1, q_2, q_3</span><span class="co">]</span>^T$</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\delta$ is the vector of control surface angles</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n$ is the vector of thruster rotational speeds (RPM)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="fu">## Components of the Dynamic Equation</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="in">```{mermaid}</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="in">graph TD</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="in">    A[Mass Matrix M] --&gt; EOM[Equation of Motion]</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="in">    B[Coriolis Matrix C] --&gt; EOM</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="in">    C[Damping Matrix D] --&gt; EOM</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="in">    D[Restoring Forces g] --&gt; EOM</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="in">    E[Control Forces τ] --&gt; EOM</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="in">    EOM --&gt; ODE[vessel_ode]</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="in">    ODE --&gt; IV[solve_ivp]</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="in">    IV --&gt; ST[Vessel State]</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="fu">### Mass Matrix ($M$)</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>The mass matrix $M$ combines the rigid-body inertia matrix $M_{RB}$ and the added mass matrix $M_A$:</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>$$M = M_{RB} + M_A$$</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Rigid-body Mass Matrix ($M_{RB}$)</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>The rigid-body mass matrix is generated in the <span class="in">`_generate_mass_matrix`</span> method in <span class="in">`calculate_hydrodynamics.py`</span>:</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>$$M_{RB} = \begin{bmatrix} m I_{3 \times 3} &amp; -m S(r_G) <span class="sc">\\</span> m S(r_G) &amp; I_G \end{bmatrix}$$</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>Where:</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$m$ is the vessel mass</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$I_{3 \times 3}$ is the 3×3 identity matrix</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$r_G$ is the center of gravity vector relative to the origin of the body frame</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$S(r_G)$ is the skew-symmetric matrix of $r_G$ (implemented by <span class="in">`Smat()`</span> in <span class="in">`module_kinematics.py`</span>)</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$I_G$ is the inertia tensor calculated from the radii of gyration</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _generate_mass_matrix(<span class="va">self</span>, CG, mass, gyration):</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate gyration tensor about vessel frame</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    xprdct2 <span class="op">=</span> np.diag(gyration)<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> Smat(CG)<span class="op">@</span>Smat(CG)</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generate the inertia matrix using radii of gyration</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>    inertia_matrix <span class="op">=</span> xprdct2 <span class="op">*</span> mass</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generate the mass matrix</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>    mass_matrix <span class="op">=</span> np.zeros((<span class="dv">6</span>,<span class="dv">6</span>))</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>    mass_matrix[<span class="dv">0</span>:<span class="dv">3</span>][:, <span class="dv">0</span>:<span class="dv">3</span>] <span class="op">=</span> mass <span class="op">*</span> np.eye(<span class="dv">3</span>)</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    mass_matrix[<span class="dv">3</span>:<span class="dv">6</span>][:, <span class="dv">3</span>:<span class="dv">6</span>] <span class="op">=</span> inertia_matrix</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>    mass_matrix[<span class="dv">0</span>:<span class="dv">3</span>][:, <span class="dv">3</span>:<span class="dv">6</span>] <span class="op">=</span> <span class="op">-</span>Smat(CG) <span class="op">*</span> mass</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>    mass_matrix[<span class="dv">3</span>:<span class="dv">6</span>][:, <span class="dv">0</span>:<span class="dv">3</span>] <span class="op">=</span> Smat(CG) <span class="op">*</span> mass</span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mass_matrix</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Added Mass Matrix ($M_A$)</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>The added mass matrix represents the added inertia due to accelerating the surrounding fluid. It's calculated from hydrodynamic data obtained from <span class="co">[</span><span class="ot">HydRA</span><span class="co">](https://hydra.hydratech.in/)</span> (You can also enter custom hydrodynamics added mass coefficients (example Y_vd) in the <span class="in">`hydrodynamics.yml`</span> input file instead of using HydRA, as discussed in the <span class="co">[</span><span class="ot">Inputs</span><span class="co">](../Inputs/inputs.qmd)</span> section).</span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>$$M_A = \begin{bmatrix} A_{11} &amp; A_{12} <span class="sc">\\</span> A_{21} &amp; A_{22} \end{bmatrix}$$</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>| <span class="in">`calculate_added_mass_from_hydra(hydra_file)`</span> | Computes the added mass matrix from HydRA data file containing frequency-dependent hydrodynamic coefficients. Extracts zero-frequency added mass for most terms, but computes heave, roll, and pitch terms at their natural frequencies for better accuracy. |</span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calculate_added_mass_from_hydra(<span class="va">self</span>, hydra_file):</span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Load hydrodynamic data</span></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(hydra_file, <span class="st">'r'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a>        mdict <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract arrays from data</span></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>    omg <span class="op">=</span> np.array(mdict[<span class="st">'w'</span>])      <span class="co"># Frequency array</span></span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a>    AM <span class="op">=</span> np.array(mdict[<span class="st">'AM'</span>])      <span class="co"># Added mass array</span></span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract zero-frequency added mass</span></span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a>    A_zero <span class="op">=</span> AM[<span class="dv">1</span>, :, :, <span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate natural frequencies and</span></span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a>    <span class="co"># interpolate added mass at those frequencies</span></span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return properly transformed added mass matrix</span></span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> A</span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a>:::{.callout-note}</span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a>The added mass calculated from HydRA is in ENU frame and so it is converted to NED frame in the <span class="in">`calculate_added_mass_from_hydra`</span> function.</span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a><span class="fu">### Coriolis and Centripetal Matrix </span></span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a>The Coriolis matrix ($C(\nu)$) accounts for forces arising from motion in a rotating reference frame (Body frame is rotating with respect to NED frame):</span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a>$$C(\nu) = C_{RB}(\nu) + C_A(\nu)$$</span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a>These matrices are calculated using:</span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a>$$C_{RB}(\nu) = \begin{bmatrix} 0_{3 \times 3} &amp; -S(M_{11} v_1 + M_{12} v_2) <span class="sc">\\</span> </span>
+<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a>-S(M_{11} v_1 + M_{12} v_2) &amp; -S(M_{21} v_1 + M_{22} v_2) \end{bmatrix}$$</span>
+<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a>$$C_A(\nu) = \begin{bmatrix} 0_{3 \times 3} &amp; -S(A_{11} v_1 + A_{12} v_2) <span class="sc">\\</span> </span>
+<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a>-S(A_{11} v_1 + A_{12} v_2) &amp; -S(A_{21} v_1 + A_{22} v_2) \end{bmatrix}$$</span>
+<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a>Where $v_1 = <span class="co">[</span><span class="ot">u, v, w</span><span class="co">]</span>^T$ and $v_2 = <span class="co">[</span><span class="ot">p, q, r</span><span class="co">]</span>^T$ are the linear and angular velocity components of $\nu$.</span>
+<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-139"><a href="#cb5-139" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-140"><a href="#cb5-140" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a>| <span class="in">`calculate_coriolis_matrices(vel)`</span> | Computes the rigid body and added mass Coriolis-centripetal matrices based on the current velocity state. Returns a tuple of $(C_{RB}, C_A)$ matrices. |</span>
+<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a><span class="fu">### Damping Matrix </span></span>
+<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-146"><a href="#cb5-146" aria-hidden="true" tabindex="-1"></a>The damping matrix ($D(\nu)$) represents hydrodynamic resistance forces and is typically modeled as:</span>
+<span id="cb5-147"><a href="#cb5-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-148"><a href="#cb5-148" aria-hidden="true" tabindex="-1"></a>$$D(\nu) = D_{linear} + D_{nonlinear}(\nu)$$</span>
+<span id="cb5-149"><a href="#cb5-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-150"><a href="#cb5-150" aria-hidden="true" tabindex="-1"></a>In the implementation, damping is handled through hydrodynamic coefficients (entered in the <span class="in">`hydrodynamics.yml`</span> input file) rather than an explicit matrix:</span>
+<span id="cb5-151"><a href="#cb5-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-152"><a href="#cb5-152" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-153"><a href="#cb5-153" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-154"><a href="#cb5-154" aria-hidden="true" tabindex="-1"></a>| <span class="in">`hydrodynamic_forces(vel)`</span> | Computes hydrodynamic damping forces by applying coefficients to velocity components. Supports linear, quadratic, and cross-terms. |</span>
+<span id="cb5-155"><a href="#cb5-155" aria-hidden="true" tabindex="-1"></a>| <span class="in">`cross_flow_drag()`</span> | Estimates sway-yaw damping coefficients for surface vessels using strip theory and Hoerner's cross-flow drag. |</span>
+<span id="cb5-156"><a href="#cb5-156" aria-hidden="true" tabindex="-1"></a>| <span class="in">`cross_flow_drag_AUV()`</span> | Similar to <span class="in">`cross_flow_drag()`</span> but includes heave-pitch calculations for AUVs. |</span>
+<span id="cb5-157"><a href="#cb5-157" aria-hidden="true" tabindex="-1"></a>| <span class="in">`hoerner()`</span> | Implements Hoerner's method for computing 2D drag coefficients based on section beam-to-draft ratio. |</span>
+<span id="cb5-158"><a href="#cb5-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-159"><a href="#cb5-159" aria-hidden="true" tabindex="-1"></a>The coefficients follow a naming convention that indicates which force/moment they affect and which velocity components are involved (you can enter any custom hydrodynamic coefficients in the <span class="in">`hydrodynamics.yml`</span> input file and it will be handled by the function for force calculations):</span>
+<span id="cb5-160"><a href="#cb5-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-161"><a href="#cb5-161" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Linear damping: <span class="in">`X_u`</span>, <span class="in">`Y_v`</span>, <span class="in">`Z_w`</span>, <span class="in">`K_p`</span>, <span class="in">`M_q`</span>, <span class="in">`N_r`</span></span>
+<span id="cb5-162"><a href="#cb5-162" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quadratic damping: <span class="in">`X_u_au`</span>, <span class="in">`Y_v_av`</span>, <span class="in">`Z_w_aw`</span>, etc. (the <span class="in">`a`</span> indicates absolute value)</span>
+<span id="cb5-163"><a href="#cb5-163" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cross-coupling: <span class="in">`X_vr`</span>, <span class="in">`Y_ur`</span>, <span class="in">`N_uv`</span>, etc.</span>
+<span id="cb5-164"><a href="#cb5-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-165"><a href="#cb5-165" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb5-166"><a href="#cb5-166" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hydrodynamic_forces(<span class="va">self</span>, vel):</span>
+<span id="cb5-167"><a href="#cb5-167" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract velocities</span></span>
+<span id="cb5-168"><a href="#cb5-168" aria-hidden="true" tabindex="-1"></a>    u, v, w, p, q, r <span class="op">=</span> vel</span>
+<span id="cb5-169"><a href="#cb5-169" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-170"><a href="#cb5-170" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize forces vector</span></span>
+<span id="cb5-171"><a href="#cb5-171" aria-hidden="true" tabindex="-1"></a>    F <span class="op">=</span> np.zeros(<span class="dv">6</span>)</span>
+<span id="cb5-172"><a href="#cb5-172" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-173"><a href="#cb5-173" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Map velocity components to values</span></span>
+<span id="cb5-174"><a href="#cb5-174" aria-hidden="true" tabindex="-1"></a>    vel_map <span class="op">=</span> {<span class="st">'u'</span>: u, <span class="st">'v'</span>: v, <span class="st">'w'</span>: w, <span class="st">'p'</span>: p, <span class="st">'q'</span>: q, <span class="st">'r'</span>: r}</span>
+<span id="cb5-175"><a href="#cb5-175" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-176"><a href="#cb5-176" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Process each hydrodynamic coefficient</span></span>
+<span id="cb5-177"><a href="#cb5-177" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> coeff_name, coeff_value <span class="kw">in</span> <span class="va">self</span>.hydrodynamics.items():</span>
+<span id="cb5-178"><a href="#cb5-178" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> coeff_value <span class="op">==</span> <span class="dv">0</span>: <span class="cf">continue</span></span>
+<span id="cb5-179"><a href="#cb5-179" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-180"><a href="#cb5-180" aria-hidden="true" tabindex="-1"></a>        parts <span class="op">=</span> coeff_name.split(<span class="st">'_'</span>)</span>
+<span id="cb5-181"><a href="#cb5-181" aria-hidden="true" tabindex="-1"></a>        force_dir <span class="op">=</span> parts[<span class="dv">0</span>]</span>
+<span id="cb5-182"><a href="#cb5-182" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> force_dir <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>.force_indices: <span class="cf">continue</span></span>
+<span id="cb5-183"><a href="#cb5-183" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-184"><a href="#cb5-184" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate force contribution</span></span>
+<span id="cb5-185"><a href="#cb5-185" aria-hidden="true" tabindex="-1"></a>        force <span class="op">=</span> coeff_value</span>
+<span id="cb5-186"><a href="#cb5-186" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> component <span class="kw">in</span> parts[<span class="dv">1</span>:]:</span>
+<span id="cb5-187"><a href="#cb5-187" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> component.startswith(<span class="st">'a'</span>) <span class="kw">and</span> <span class="bu">len</span>(component) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb5-188"><a href="#cb5-188" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Absolute value term (e.g., u|u|)</span></span>
+<span id="cb5-189"><a href="#cb5-189" aria-hidden="true" tabindex="-1"></a>                v_char <span class="op">=</span> component[<span class="dv">1</span>:]</span>
+<span id="cb5-190"><a href="#cb5-190" aria-hidden="true" tabindex="-1"></a>                force <span class="op">*=</span> <span class="bu">abs</span>(vel_map[v_char])</span>
+<span id="cb5-191"><a href="#cb5-191" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> component <span class="kw">in</span> vel_map:</span>
+<span id="cb5-192"><a href="#cb5-192" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Regular term</span></span>
+<span id="cb5-193"><a href="#cb5-193" aria-hidden="true" tabindex="-1"></a>                force <span class="op">*=</span> vel_map[component]</span>
+<span id="cb5-194"><a href="#cb5-194" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb5-195"><a href="#cb5-195" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add to force vector</span></span>
+<span id="cb5-196"><a href="#cb5-196" aria-hidden="true" tabindex="-1"></a>        F[<span class="va">self</span>.force_indices[force_dir]] <span class="op">+=</span> force</span>
+<span id="cb5-197"><a href="#cb5-197" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-198"><a href="#cb5-198" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> F</span>
+<span id="cb5-199"><a href="#cb5-199" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-200"><a href="#cb5-200" aria-hidden="true" tabindex="-1"></a><span class="fu">### Restoring Forces </span></span>
+<span id="cb5-201"><a href="#cb5-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-202"><a href="#cb5-202" aria-hidden="true" tabindex="-1"></a>The restoring forces ($g(\eta)$) include gravitational and buoyancy effects:</span>
+<span id="cb5-203"><a href="#cb5-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-204"><a href="#cb5-204" aria-hidden="true" tabindex="-1"></a>$$g(\eta) = \begin{bmatrix} </span>
+<span id="cb5-205"><a href="#cb5-205" aria-hidden="true" tabindex="-1"></a>(W - B) \sin \theta <span class="sc">\\</span> </span>
+<span id="cb5-206"><a href="#cb5-206" aria-hidden="true" tabindex="-1"></a>-(W - B) \cos \theta \sin \phi <span class="sc">\\</span> </span>
+<span id="cb5-207"><a href="#cb5-207" aria-hidden="true" tabindex="-1"></a>-(W - B) \cos \theta \cos \phi <span class="sc">\\</span> </span>
+<span id="cb5-208"><a href="#cb5-208" aria-hidden="true" tabindex="-1"></a>-(y_G W - y_B B) \cos \theta \cos \phi + (z_G W - z_B B) \cos \theta \sin \phi <span class="sc">\\</span> </span>
+<span id="cb5-209"><a href="#cb5-209" aria-hidden="true" tabindex="-1"></a>(z_G W - z_B B) \sin \theta + (x_G W - x_B B) \cos \theta \cos \phi <span class="sc">\\</span> </span>
+<span id="cb5-210"><a href="#cb5-210" aria-hidden="true" tabindex="-1"></a>-(x_G W - x_B B) \cos \theta \sin \phi - (y_G W - y_B B) \sin \theta </span>
+<span id="cb5-211"><a href="#cb5-211" aria-hidden="true" tabindex="-1"></a>\end{bmatrix}$$</span>
+<span id="cb5-212"><a href="#cb5-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-213"><a href="#cb5-213" aria-hidden="true" tabindex="-1"></a>Where:</span>
+<span id="cb5-214"><a href="#cb5-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-215"><a href="#cb5-215" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$W = mg$ is the weight</span>
+<span id="cb5-216"><a href="#cb5-216" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$B = \rho g \nabla$ is the buoyancy force (with $\nabla$ being the displaced volume)</span>
+<span id="cb5-217"><a href="#cb5-217" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$r_G = <span class="co">[</span><span class="ot">x_G, y_G, z_G</span><span class="co">]</span>^T$ is the center of gravity mentioned in the <span class="in">`geometry.yml`</span> input file</span>
+<span id="cb5-218"><a href="#cb5-218" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$r_B = <span class="co">[</span><span class="ot">x_B, y_B, z_B</span><span class="co">]</span>^T$ is the center of buoyancy mentioned in the <span class="in">`geometry.yml`</span> input file</span>
+<span id="cb5-219"><a href="#cb5-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-220"><a href="#cb5-220" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-221"><a href="#cb5-221" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-222"><a href="#cb5-222" aria-hidden="true" tabindex="-1"></a>| <span class="in">`gravitational_forces(phi, theta)`</span> | Computes the gravitational and buoyancy forces and moments as a function of roll and pitch angles. |</span>
+<span id="cb5-223"><a href="#cb5-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-224"><a href="#cb5-224" aria-hidden="true" tabindex="-1"></a><span class="fu">### Control Forces </span></span>
+<span id="cb5-225"><a href="#cb5-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-226"><a href="#cb5-226" aria-hidden="true" tabindex="-1"></a>The control forces vector $\tau$ represents the combined effect of control surfaces and thrusters.#### Control Surface Forces</span>
+<span id="cb5-227"><a href="#cb5-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-228"><a href="#cb5-228" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-229"><a href="#cb5-229" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-230"><a href="#cb5-230" aria-hidden="true" tabindex="-1"></a>| <span class="in">`control_forces(delta)`</span> | Calculates forces and moments generated by control surfaces (rudders, fins, etc.) based on their deflection angles $\delta$. Supports both hydrodynamic coefficient-based and aerofoil-based calculation methods. |</span>
+<span id="cb5-231"><a href="#cb5-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-232"><a href="#cb5-232" aria-hidden="true" tabindex="-1"></a>For hydrodynamic coefficient-based calculation:</span>
+<span id="cb5-233"><a href="#cb5-233" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Forces are calculated as $\tau_i = C_{i\delta} \delta$, where $C_{i\delta}$ is the control coefficient mentioned in the <span class="in">`control_surface_hydrodynamics`</span> in the <span class="in">`control_surfaces.yml`</span> input file</span>
+<span id="cb5-234"><a href="#cb5-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-235"><a href="#cb5-235" aria-hidden="true" tabindex="-1"></a>For aerofoil-based calculation:</span>
+<span id="cb5-236"><a href="#cb5-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-237"><a href="#cb5-237" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Local velocity at the control surface is calculated considering vessel motion (automatically done)</span>
+<span id="cb5-238"><a href="#cb5-238" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Angle of attack is determined from flow direction and surface deflection</span>
+<span id="cb5-239"><a href="#cb5-239" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Lift and drag forces are calculated using NACA airfoil data (path to the NACA file is mentioned in the <span class="in">`control_surfaces.yml`</span> input file)</span>
+<span id="cb5-240"><a href="#cb5-240" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Forces are transformed to the body frame and a generalized force vector is returned</span>
+<span id="cb5-241"><a href="#cb5-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-242"><a href="#cb5-242" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Thruster Forces</span></span>
+<span id="cb5-243"><a href="#cb5-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-244"><a href="#cb5-244" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-245"><a href="#cb5-245" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-246"><a href="#cb5-246" aria-hidden="true" tabindex="-1"></a>| <span class="in">`thruster_forces(n_prop)`</span> | Calculates forces and moments from propellers/thrusters based on their rotational speeds $n$ in RPM. Models thrust using propeller theory with advance ratio and thrust coefficients. |</span>
+<span id="cb5-247"><a href="#cb5-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-248"><a href="#cb5-248" aria-hidden="true" tabindex="-1"></a>The thrust calculation follows the form:</span>
+<span id="cb5-249"><a href="#cb5-249" aria-hidden="true" tabindex="-1"></a>$$X_{prop} = K_T \rho D^4 |n| n$$</span>
+<span id="cb5-250"><a href="#cb5-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-251"><a href="#cb5-251" aria-hidden="true" tabindex="-1"></a>Where:</span>
+<span id="cb5-252"><a href="#cb5-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-253"><a href="#cb5-253" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$K_T$ is the thrust coefficient (approximated as $K_{T,J=0}(1-J)$ with $J$ being the advance ratio)</span>
+<span id="cb5-254"><a href="#cb5-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\rho$ is the water density</span>
+<span id="cb5-255"><a href="#cb5-255" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$D$ is the propeller diameter</span>
+<span id="cb5-256"><a href="#cb5-256" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n$ is the propeller speed in revolutions per second</span>
+<span id="cb5-257"><a href="#cb5-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-258"><a href="#cb5-258" aria-hidden="true" tabindex="-1"></a><span class="fu">## Vessel ODE and Simulation</span></span>
+<span id="cb5-259"><a href="#cb5-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-260"><a href="#cb5-260" aria-hidden="true" tabindex="-1"></a>The vessel dynamics are implemented as an ordinary differential equation (ODE) in the <span class="in">`vessel_ode(t, state)`</span> method, which computes the state derivatives:</span>
+<span id="cb5-261"><a href="#cb5-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-262"><a href="#cb5-262" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb5-263"><a href="#cb5-263" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> vessel_ode(<span class="va">self</span>, t, state):</span>
+<span id="cb5-264"><a href="#cb5-264" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract state components</span></span>
+<span id="cb5-265"><a href="#cb5-265" aria-hidden="true" tabindex="-1"></a>    vel <span class="op">=</span> state[<span class="dv">0</span>:<span class="dv">6</span>]  <span class="co"># [u, v, w, p, q, r]</span></span>
+<span id="cb5-266"><a href="#cb5-266" aria-hidden="true" tabindex="-1"></a>    pos <span class="op">=</span> state[<span class="dv">6</span>:<span class="dv">9</span>]  <span class="co"># [x, y, z]</span></span>
+<span id="cb5-267"><a href="#cb5-267" aria-hidden="true" tabindex="-1"></a>    angles <span class="op">=</span> state[<span class="dv">9</span>:attitude_end]  <span class="co"># [phi, theta, psi] or quaternion</span></span>
+<span id="cb5-268"><a href="#cb5-268" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-269"><a href="#cb5-269" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate forces and moments</span></span>
+<span id="cb5-270"><a href="#cb5-270" aria-hidden="true" tabindex="-1"></a>    F_hyd <span class="op">=</span> <span class="va">self</span>.hydrodynamic_forces(vel)</span>
+<span id="cb5-271"><a href="#cb5-271" aria-hidden="true" tabindex="-1"></a>    F_control <span class="op">=</span> <span class="va">self</span>.control_forces(state[control_start:thruster_start])</span>
+<span id="cb5-272"><a href="#cb5-272" aria-hidden="true" tabindex="-1"></a>    F_thrust <span class="op">=</span> <span class="va">self</span>.thruster_forces(state[thruster_start:])</span>
+<span id="cb5-273"><a href="#cb5-273" aria-hidden="true" tabindex="-1"></a>    F_g <span class="op">=</span> <span class="va">self</span>.gravitational_forces(angles[<span class="dv">0</span>], angles[<span class="dv">1</span>])</span>
+<span id="cb5-274"><a href="#cb5-274" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-275"><a href="#cb5-275" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="va">self</span>.coriolis_flag:</span>
+<span id="cb5-276"><a href="#cb5-276" aria-hidden="true" tabindex="-1"></a>        C_RB, C_A <span class="op">=</span> <span class="va">self</span>.calculate_coriolis_matrices(vel)</span>
+<span id="cb5-277"><a href="#cb5-277" aria-hidden="true" tabindex="-1"></a>        F_C <span class="op">=</span> (C_RB <span class="op">+</span> C_A) <span class="op">@</span> vel</span>
+<span id="cb5-278"><a href="#cb5-278" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-279"><a href="#cb5-279" aria-hidden="true" tabindex="-1"></a>        F_C <span class="op">=</span> np.zeros(<span class="dv">6</span>)</span>
+<span id="cb5-280"><a href="#cb5-280" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-281"><a href="#cb5-281" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Total force</span></span>
+<span id="cb5-282"><a href="#cb5-282" aria-hidden="true" tabindex="-1"></a>    F <span class="op">=</span> F_hyd <span class="op">+</span> F_control <span class="op">+</span> F_thrust <span class="op">-</span> F_g <span class="op">-</span> F_C</span>
+<span id="cb5-283"><a href="#cb5-283" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-284"><a href="#cb5-284" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate velocity derivatives</span></span>
+<span id="cb5-285"><a href="#cb5-285" aria-hidden="true" tabindex="-1"></a>    M <span class="op">=</span> <span class="va">self</span>.mass_matrix <span class="op">+</span> <span class="va">self</span>.added_mass_matrix  <span class="co"># Total mass matrix</span></span>
+<span id="cb5-286"><a href="#cb5-286" aria-hidden="true" tabindex="-1"></a>    state_dot[<span class="dv">0</span>:<span class="dv">6</span>] <span class="op">=</span> np.linalg.inv(M) <span class="op">@</span> F</span>
+<span id="cb5-287"><a href="#cb5-287" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-288"><a href="#cb5-288" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate position and attitude derivatives</span></span>
+<span id="cb5-289"><a href="#cb5-289" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb5-290"><a href="#cb5-290" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-291"><a href="#cb5-291" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> state_dot</span>
+<span id="cb5-292"><a href="#cb5-292" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb5-293"><a href="#cb5-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-294"><a href="#cb5-294" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-295"><a href="#cb5-295" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-296"><a href="#cb5-296" aria-hidden="true" tabindex="-1"></a>| <span class="in">`step()`</span> | Advances the simulation by one time step by solving the ODE using SciPy's <span class="in">`solve_ivp`</span>. |</span>
+<span id="cb5-297"><a href="#cb5-297" aria-hidden="true" tabindex="-1"></a>| <span class="in">`simulate()`</span> | Runs the full simulation by repeatedly calling <span class="in">`step()`</span> until the final time. |</span>
+<span id="cb5-298"><a href="#cb5-298" aria-hidden="true" tabindex="-1"></a>| <span class="in">`reset()`</span> | Resets the vessel to its initial state. |</span>
+<span id="cb5-299"><a href="#cb5-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-300"><a href="#cb5-300" aria-hidden="true" tabindex="-1"></a><span class="fu">## Helper Methods and Utilities</span></span>
+<span id="cb5-301"><a href="#cb5-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-302"><a href="#cb5-302" aria-hidden="true" tabindex="-1"></a><span class="fu">### Dimensionalization</span></span>
+<span id="cb5-303"><a href="#cb5-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-304"><a href="#cb5-304" aria-hidden="true" tabindex="-1"></a>Hydrodynamic coefficients can be provided in non-dimensional form and converted to dimensional form:</span>
+<span id="cb5-305"><a href="#cb5-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-306"><a href="#cb5-306" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-307"><a href="#cb5-307" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-308"><a href="#cb5-308" aria-hidden="true" tabindex="-1"></a>| <span class="in">`_dimensionalize_coefficients(rho, L, U)`</span> | Converts non-dimensional hydrodynamic coefficients to dimensional form based on density $\rho$, length $L$, and characteristic velocity $U$ (mentioned in the <span class="in">`simulation_input.yml`</span> file) |</span>
+<span id="cb5-309"><a href="#cb5-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-310"><a href="#cb5-310" aria-hidden="true" tabindex="-1"></a><span class="fu">### Hydrodynamic Coefficient Calculation</span></span>
+<span id="cb5-311"><a href="#cb5-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-312"><a href="#cb5-312" aria-hidden="true" tabindex="-1"></a>| Function | Description |</span>
+<span id="cb5-313"><a href="#cb5-313" aria-hidden="true" tabindex="-1"></a>|----------|-------------|</span>
+<span id="cb5-314"><a href="#cb5-314" aria-hidden="true" tabindex="-1"></a>| <span class="in">`calculate_added_mass_from_hydra(hydra_file)`</span> | Calculates the added mass matrix from HydRA data files. |</span>
+<span id="cb5-315"><a href="#cb5-315" aria-hidden="true" tabindex="-1"></a>| <span class="in">`cross_flow_drag()`</span> | Estimates sway-yaw hydrodynamic coefficients using strip theory. |</span>
+<span id="cb5-316"><a href="#cb5-316" aria-hidden="true" tabindex="-1"></a>| <span class="in">`cross_flow_drag_AUV()`</span> | Estimates both sway-yaw and heave-pitch coefficients for underwater vehicles. |</span>
+<span id="cb5-317"><a href="#cb5-317" aria-hidden="true" tabindex="-1"></a>| <span class="in">`hoerner()`</span> | Implements Hoerner's method for 2D section drag coefficient calculation. |</span>
+<span id="cb5-318"><a href="#cb5-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-319"><a href="#cb5-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-320"><a href="#cb5-320" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb5-321"><a href="#cb5-321" aria-hidden="true" tabindex="-1"></a>Understanding these dynamics components is essential for correctly configuring vessel parameters and interpreting simulation results. The implementation allows for flexible modeling of different vessel types by adjusting the parameters and coefficients.</span>
+<span id="cb5-322"><a href="#cb5-322" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb5-323"><a href="#cb5-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-324"><a href="#cb5-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-325"><a href="#cb5-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-326"><a href="#cb5-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-327"><a href="#cb5-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-328"><a href="#cb5-328" aria-hidden="true" tabindex="-1"></a></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goldenrishabh/panisim/edit/main/rawFiles/Dynamics/Dynamics.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goldenrishabh/panisim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

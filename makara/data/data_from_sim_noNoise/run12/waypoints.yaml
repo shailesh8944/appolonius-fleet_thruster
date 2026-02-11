@@ -1,0 +1,6 @@
+waypoints:
+- [0, 0, 0]
+- [-10, -3, 0]
+- [9, -9, 0]
+- [0, 0, 0]
+waypoints_type: XYZ

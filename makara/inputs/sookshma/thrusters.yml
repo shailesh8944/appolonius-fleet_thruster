@@ -1,0 +1,21 @@
+thrusters:
+  - thruster_name: port
+    thruster_id: 1
+    thruster_location: [-0.4, -0.26, 0.0]    # y<0 port
+    thruster_orientation: [0.0, 0.0, 0.0]
+    T_act: 0.2
+    D_prop: 0.1
+    tp: 0.0
+    KT_at_J0: 0.12
+    n_max: 2668
+    J_vs_KT: None
+  - thruster_name: stbd
+    thruster_id: 2
+    thruster_location: [-0.4, 0.26, 0.0]     # y>0 starboard
+    thruster_orientation: [0.0, 0.0, 0.0]
+    T_act: 0.2
+    D_prop: 0.1
+    tp: 0.0
+    KT_at_J0: 0.12
+    n_max: 2668
+    J_vs_KT: None

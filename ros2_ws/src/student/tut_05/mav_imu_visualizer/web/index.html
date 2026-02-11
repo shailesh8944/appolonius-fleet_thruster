@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live IMU Visualization</title>
+  <!-- Include Chart.js (from CDN or your local node_modules build) -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+  <script src="node_modules/chart.js/dist/chart.umd.js"></script>
+  <!-- Include ROSLIBJS (from your node_modules or a CDN) -->
+  <script src="node_modules/roslib/build/roslib.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    h1, h2 {
+      color: #2c3e50;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    .chart-container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      margin: 10px auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>IMU Data Visualization</h1>
+
+  <div class="chart-container">
+    <h2>Acceleration (m/s²)</h2>
+    <canvas id="accChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h2>Angular Velocity (rad/s)</h2>
+    <canvas id="gyroChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h2>Euler Angles (degrees)</h2>
+    <canvas id="rollChart"></canvas>
+    <canvas id="pitchChart"></canvas>
+    <canvas id="yawChart"></canvas>
+  </div>
+
+  <!-- Main JavaScript file -->
+  <script src="main.js"></script>
+</body>
+</html>

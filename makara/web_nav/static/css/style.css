@@ -1,0 +1,186 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f0f2f5;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 350px;
+    padding: 20px;
+    background-color: white;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+#map {
+    flex: 1;
+    height: 100%;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+h3 {
+    margin: 15px 0 10px;
+    color: #34495e;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-panel > div {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.input-group {
+    margin-bottom: 10px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 14px;
+}
+
+select, input, button {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+select:focus, input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+}
+
+button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-green {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-green:hover {
+    background-color: #27ae60;
+}
+
+.btn-red {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-red:hover {
+    background-color: #c0392b;
+}
+
+.btn-orange {
+    background-color: #e67e22;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #d35400;
+}
+
+.coordinates {
+    background-color: white !important;
+}
+
+#currentCoords {
+    font-family: monospace;
+    margin-top: 5px;
+    word-wrap: break-word;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.info-text {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.instructions ul {
+    list-style-type: none;
+    padding-left: 5px;
+}
+
+.instructions li {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructions li:before {
+    content: "•";
+    color: #3498db;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+/* Leaflet custom styles */
+.leaflet-popup-content {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.coordinate-editor {
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.coordinate-editor input {
+    width: 120px;
+    margin: 5px;
+}
+
+.coordinate-editor button {
+    margin: 5px;
+    padding: 5px 10px;
+    width: auto;
+} 

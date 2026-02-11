@@ -1,0 +1,17 @@
+# Dimensions of the box enclosing the vessel
+length: 2.9091
+breadth: 0.5273
+depth: 0.2727
+Fn: 0.142
+gyration: [0.211, 0.727, 0.727]
+CO:
+  position: [0.0, 0.0, 0.0] # Relative to the origin of the 3d software
+  orientation: [0.0, 0.0, 0.0]
+CG:
+  position: [0.0, 0.0, 0.0]
+CB:
+  position: [0.0, 0.0, 0.0]
+  
+geometry_file: /workspaces/mavlab/inputs/kurma/HydRA/input/kurma.gdf
+
+

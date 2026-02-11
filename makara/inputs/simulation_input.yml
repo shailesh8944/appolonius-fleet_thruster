@@ -1,0 +1,134 @@
+#Simulation Specific Inputs
+sim_time: 100
+time_step: 0.1
+density: 1000
+gravity: 9.80665
+world_size: [100, 100, Inf]
+gps_datum: [12.99300425860631, 80.23913114094384, -87.0]
+
+geofence:
+  - [12.993496, 80.239007]
+  - [12.993500, 80.238903]
+  - [12.993485, 80.238829]
+  - [12.993359, 80.238699]
+  - [12.993547, 80.238437]
+  - [12.993716, 80.238475]
+  - [12.994077, 80.239559]
+  - [12.993809, 80.239807]
+  - [12.993271, 80.240646]
+  - [12.993050, 80.240423]
+  - [12.993193, 80.239274]
+  - [12.993044, 80.239217]
+  - [12.993054, 80.239120]
+  - [12.993335, 80.239098]
+  - [12.993496, 80.239007] 
+
+static_obstacle:
+  - [12.993496, 80.239007]
+  - [12.993500, 80.238903]
+  - [12.993485, 80.238829]
+  - [12.993359, 80.238699]
+  - [12.993547, 80.238437]
+
+nagents: 4
+
+agents:
+  - 
+    name: sookshma
+    type: usv
+    U: 0.5 # For dimensionalization of hydrodynamic coefficients
+    maintain_speed: true
+    active_dof: [1,1,1,1,1,1] # All degrees of freedom are active
+    geometry: /workspaces/mavlab/inputs/{name}/geometry.yml
+    inertia: /workspaces/mavlab/inputs/{name}/inertia.yml
+    hydrodynamics: /workspaces/mavlab/inputs/{name}/hydrodynamics.yml
+    control_surfaces: /workspaces/mavlab/inputs/{name}/control_surfaces.yml
+    initial_conditions: /workspaces/mavlab/inputs/{name}/initial_conditions.yml
+    sensors: /workspaces/mavlab/inputs/{name}/sensors.yml
+    guidance: /workspaces/mavlab/inputs/{name}/guidance.yml
+    control: /workspaces/mavlab/inputs/{name}/control.yml
+    thrusters: /workspaces/mavlab/inputs/{name}/thrusters.yml
+    
+
+  - 
+    name: sookshma2
+    type: usv
+    U: 0.5 # For dimensionalization of hydrodynamic coefficients
+    maintain_speed: true
+    active_dof: [1,1,1,1,1,1] # All degrees of freedom are active
+    geometry: /workspaces/mavlab/inputs/{name}/geometry.yml
+    inertia: /workspaces/mavlab/inputs/{name}/inertia.yml
+    hydrodynamics: /workspaces/mavlab/inputs/{name}/hydrodynamics.yml
+    control_surfaces: /workspaces/mavlab/inputs/{name}/control_surfaces.yml
+    initial_conditions: /workspaces/mavlab/inputs/{name}/initial_conditions.yml
+    sensors: /workspaces/mavlab/inputs/{name}/sensors.yml
+    guidance: /workspaces/mavlab/inputs/{name}/guidance.yml
+    control: /workspaces/mavlab/inputs/{name}/control.yml
+    thrusters: /workspaces/mavlab/inputs/{name}/thrusters.yml
+    
+
+  - 
+    name: sookshma3
+    type: usv
+    U: 0.5 # For dimensionalization of hydrodynamic coefficients
+    maintain_speed: true
+    active_dof: [1,1,1,1,1,1] # All degrees of freedom are active
+    geometry: /workspaces/mavlab/inputs/{name}/geometry.yml
+    inertia: /workspaces/mavlab/inputs/{name}/inertia.yml
+    hydrodynamics: /workspaces/mavlab/inputs/{name}/hydrodynamics.yml
+    control_surfaces: /workspaces/mavlab/inputs/{name}/control_surfaces.yml
+    initial_conditions: /workspaces/mavlab/inputs/{name}/initial_conditions.yml
+    sensors: /workspaces/mavlab/inputs/{name}/sensors.yml
+    guidance: /workspaces/mavlab/inputs/{name}/guidance.yml
+    control: /workspaces/mavlab/inputs/{name}/control.yml
+    thrusters: /workspaces/mavlab/inputs/{name}/thrusters.yml
+    
+
+  - 
+    name: evader
+    type: usv
+    U: 0.51 # For dimensionalization of hydrodynamic coefficients
+    maintain_speed: true
+    active_dof: [1,1,1,1,1,1] # All degrees of freedom are active
+    geometry: /workspaces/mavlab/inputs/{name}/geometry.yml
+    inertia: /workspaces/mavlab/inputs/{name}/inertia.yml
+    hydrodynamics: /workspaces/mavlab/inputs/{name}/hydrodynamics.yml
+    control_surfaces: /workspaces/mavlab/inputs/{name}/control_surfaces.yml
+    initial_conditions: /workspaces/mavlab/inputs/{name}/initial_conditions.yml
+    sensors: /workspaces/mavlab/inputs/{name}/sensors.yml
+    guidance: /workspaces/mavlab/inputs/{name}/guidance.yml
+    control: /workspaces/mavlab/inputs/{name}/control.yml
+    thrusters: /workspaces/mavlab/inputs/{name}/thrusters.yml
+
+# agents:
+#   -
+#     name: mavymini
+#     type: auv
+#     geometry: /workspaces/mavlab/inputs/{name}/geometry.yml
+#     inertia: /workspaces/mavlab/inputs/{name}/inertia.yml
+#     hydrodynamics: /workspaces/mavlab/inputs/{name}/hydrodynamics.yml
+#     control_surfaces: /workspaces/mavlab/inputs/{name}/control_surfaces.yml
+#     initial_conditions: /workspaces/mavlab/inputs/{name}/initial_conditions.yml
+#     sensors: /workspaces/mavlab/inputs/{name}/sensors.yml
+#     guidance: /workspaces/mavlab/inputs/{name}/guidance.yml
+#     control: /workspaces/mavlab/inputs/{name}/control.yml
+#     thrusters: /workspaces/mavlab/inputs/{name}/thrusters.yml
+#   # This is an example of multiple agents
+#   -
+#     name: mavymini2
+#     type: auv
+#     geometry: /workspaces/mavlab/inputs/{name}/geometry.yml
+#     inertia: /workspaces/mavlab/inputs/{name}/inertia.yml
+#     hydrodynamics: /workspaces/mavlab/inputs/{name}/hydrodynamics.yml
+#     control_surfaces: /workspaces/mavlab/inputs/{name}/control_surfaces.yml
+#     initial_conditions: /workspaces/mavlab/inputs/{name}/initial_conditions.yml
+#     sensors: /workspaces/mavlab/inputs/{name}/sensors.yml
+#     guidance: /workspaces/mavlab/inputs/{name}/guidance.yml
+#     control: /workspaces/mavlab/inputs/{name}/control.yml
+#     thrusters: /workspaces/mavlab/inputs/{name}/thrusters.yml
+
+
+
+
+
+

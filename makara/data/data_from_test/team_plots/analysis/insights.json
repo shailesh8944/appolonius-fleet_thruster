@@ -1,0 +1,14 @@
+{
+    "overall_stats": {
+        "total_teams": 19,
+        "total_attempts": 61,
+        "avg_score": 200.5,
+        "median_score": 196.0,
+        "min_score": 31.0,
+        "max_score": 788.0
+    },
+    "text_insights": [
+        "The average score across all teams was 200.5, with the best team achieving a score of 31.0.",
+        "Teams that successfully tracked more waypoints generally had better scores."
+    ]
+}

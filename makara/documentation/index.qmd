@@ -1,0 +1,41 @@
+# Pani Simulator {.unnumbered}
+
+Pani (which means $\textit{water}$ in Hindi) is a high fidelity marine vessel simulator. It is built in a manner such that minimum backend edits are required by the user and the simulator can be both configured and run in an intuitive lightweight GUI application which runs on the web. An attempt to make it as "Microsoft's Flight Simualtor" but for marine vessels has been made.
+
+The simulator can be used to configure a new marine vessel, simulate sensors such as DVL, IMU, LiDAR and Camera, and control the vessel either via teleop input or custom files for autonomous tasks. The simulator supports multiple agents which is useful for swarm autonomy tasks or to develop better collision avoidance algorithms.
+
+The project has been made open source to allow for further development of this simulator and add additional features to make it more versatile. 
+
+## Overview
+
+The Simulator is majorly divided into two parts:
+
+- Vessel Configurator
+- Vessel Simulation
+
+The Vessel Configurator is what allows you to configure a new marine vessel. You can load a FBX Geometry file, select individual components such as control surfaces, thrusters, sensors and configure their parameters via the interactive GUI. If you like a more geeky experience, you can edit the input files manually as well. There are also options to enter the non-linear hydrodynamics coefficients for the vessel (which we plan to integrate with our in-house system identification algorithm, in future), set vessel geometry parameters and specify initial conditions. This is also where you will setup the simulation parameters such as time, time-step, geofence, GPS datum and physical constants (gravity, density etc). It also supports the output from our in-house hydrodynamics program \textit{HyDRA}, which gives the added mass coefficients and wave hydrodynamics of the vessel. Once you are done with the vessel configuration, the program auto generates the input files required for the simulation to run.
+
+![Vessel Configurator](./images/vesselConfigurator.png)
+
+The Vessel Simulation is where the actual simulation takes place. It follows the dynamics as per the parameters you set in the Vessel Configurator. This is where you can also custom code your control and guidance algorithms which will publish the required data in ROS2 to make the vessel run. Currently the sensors are simulated with added noise whose outputs you can see in the ROS2 terminal, or from the GUI. We soon plan to add modelling for the simulator with real world physics.
+
+::: {.content-visible when-format="html"}
+![Way-point trackingSimulation Visualization](./images/simulation2.gif)
+:::
+
+::: {.content-visible when-format="pdf"}
+![Way-point trackingSimulation Visualization](./images/simulation2.png)
+:::
+
+## Key Features
+
+- **Realistic Physics**: Follows dyanmics modelling as defined by Fossen's \textit{Handbook of Marine Craft Hydrodynamics and Motion Control}
+- **Modular Architecture**: Easy integration of custom vessel models, sensors, and controllers
+- **ROS2 Integration**: Native support for Robot Operating System 2 (ROS2) for distributed robotics applications
+- **Web Application**: Lightweight web application for configuring and running the simulation
+- **Multiple Agents**: Simulate multiple vessels in the same environment
+
+## How to Use This Documentation
+
+Navigate through the sections using the sidebar. The documentation discusses the Setup, theory on the Kinematics and Dynamics used in the simulator, the coordinate systems used for various components (control surfaces, thrusters, sensors and Body centre), the python simulator backend and how to use the Panisim vessel configurator and the Panisim vessel simulator.
+

@@ -1,0 +1,67 @@
+naca_number: &naca 0015
+naca_file: /workspaces/mavlab/inputs/mavymini/NACA0015.csv
+delta_max: &dmax 35.0
+deltad_max: &ddmax 1.0
+area: &area 0.1 
+
+control_surfaces:
+  - 
+    control_surface_type: Rudder
+    control_surface_id: 1
+    control_surface_location: [0.0, 0.0, 0.0]    # With respect to BODY frame
+    control_surface_orientation: [0.0, 0.0, 0.0]  # With respect to BODY frame
+    control_surface_area: *area
+    control_surface_NACA: *naca
+    control_surface_T: 0.1
+    control_surface_delta_max: *dmax
+    control_surface_deltad_max: *ddmax
+  - 
+    control_surface_type: Rudder
+    control_surface_id: 2
+    control_surface_location: [0.0, 0.0, 0.0]    # With respect to BODY frame
+    control_surface_orientation: [0.0, 0.0, 0.0]  # With respect to BODY frame
+    control_surface_area: *area
+    control_surface_NACA: *naca
+    control_surface_T: 0.1
+    control_surface_delta_max: *dmax
+    control_surface_deltad_max: *ddmax
+  - 
+    control_surface_type: Fins
+    control_surface_id: 3
+    control_surface_location: [0.0, 0.0, 0.0]    # With respect to BODY frame
+    control_surface_orientation: [0.0, 0.0, 0.0]  # With respect to BODY frame
+    control_surface_area: *area
+    control_surface_NACA: *naca
+    control_surface_T: 0.1
+    control_surface_delta_max: *dmax
+    control_surface_deltad_max: *ddmax
+  - 
+    control_surface_type: Fins
+    control_surface_id: 4
+    control_surface_location: [0.0, 0.0, 0.0]    # With respect to BODY frame
+    control_surface_orientation: [0.0, 0.0, 0.0]  # With respect to BODY frame
+    control_surface_area: *area
+    control_surface_NACA: *naca
+    control_surface_T: 0.1
+    control_surface_delta_max: *dmax
+    control_surface_deltad_max: *ddmax
+  - 
+    control_surface_type: Fins
+    control_surface_id: 5
+    control_surface_location: [0.0, 0.0, 0.0]    # With respect to BODY frame
+    control_surface_orientation: [0.0, 0.0, 0.0]  # With respect to BODY frame
+    control_surface_area: *area
+    control_surface_NACA: *naca
+    control_surface_T: 0.1
+    control_surface_delta_max: *dmax
+    control_surface_deltad_max: *ddmax
+  -
+    control_surface_type: Fins
+    control_surface_id: 6
+    control_surface_location: [0.0, 0.0, 0.0]    # With respect to BODY frame
+    control_surface_orientation: [0.0, 0.0, 0.0]  # With respect to BODY frame
+    control_surface_area: *area
+    control_surface_NACA: *naca
+    control_surface_T: 0.1
+    control_surface_delta_max: *dmax
+    control_surface_deltad_max: *ddmax

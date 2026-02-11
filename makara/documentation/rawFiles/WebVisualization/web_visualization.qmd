@@ -1,0 +1,240 @@
+# Simulation Visualization Dashboard {.unnumbered}
+
+## Overview
+
+Panisim provides a web-based visualization dashboard to monitor vessel simulation in real-time. The dashboard offers a comprehensive interface for monitoring vessel state, visualizing trajectories, viewing sensor data, and interacting with the simulation.
+
+The visualization system consists of two main components:
+
+1. **2D Dashboard** - A data-rich interface showing vessel state, charts, and control inputs
+2. **3D Visualization** - A three-dimensional view of the vessel in its environment with position and orientation
+
+
+::: {.content-visible when-format="html"}
+![Way-point trackingSimulation Visualization](../../images/simulation2.gif)
+:::
+
+::: {.content-visible when-format="pdf"}
+![Way-point trackingSimulation Visualization](../../images/simulation2.png)
+:::
+
+
+```{mermaid}
+flowchart LR
+    subgraph ROS2["ROS2 Environment"]
+        Sim["Panisim Simulator"]
+        Bridge["ROS Bridge Server"]
+    end
+    
+    subgraph Web["Web Interface"]
+        Dashboard["2D Dashboard<br>(index.html)"]
+        View3D["3D Visualization<br>(vessel3d.html)"]
+        JSLib["Web Client<br>(main.js)"]
+    end
+    
+    Sim -->|"Vessel State<br>Odometry<br>Sensor Data"| Bridge
+    Bridge -->|"WebSocket<br>Communication"| JSLib
+    JSLib --> Dashboard
+    JSLib --> View3D
+
+    classDef ros fill:#5D8AA8,stroke:#1F456E,color:white;
+    classDef web fill:#6B8E23,stroke:#2E3B0F,color:white;
+    
+    class Sim,Bridge ros;
+    class Dashboard,View3D,JSLib web;
+```
+
+## Starting the Visualization
+
+The web interface is automatically started when launching the Panisim simulator. It uses:
+
+1. A lightweight HTTP server to host the web files
+2. The ROS Bridge server for WebSocket communication with ROS2
+
+The visualization launches when running the simulation:
+
+```bash
+ros2 launch gnc gnc_launch.py
+```
+
+Once started, you can access the dashboard by opening your web browser:
+
+- **Main Dashboard**: `http://localhost:8000/`
+- **3D Visualization**: `http://localhost:8000/vessel3d.html`
+
+## Main Dashboard
+
+The main dashboard (index.html) provides a comprehensive overview of the vessel's state, sensor data, and control inputs.
+
+### Key Features
+
+1. **Vessel Selection**: Switch between different vessels in the simulation
+2. **Connection Status**: Real-time display of connectivity to the ROS2 environment
+3. **Vessel Information**: Display of key vessel parameters (position, velocity, orientation)
+4. **Data Visualizations**: Real-time charts for:
+   - Vessel path and trajectory
+   - Velocities (linear and angular)
+   - Orientation (roll, pitch, yaw)
+   - Control surface positions
+   - Thruster states
+
+### Dashboard Layout
+
+The dashboard is organized in a responsive grid layout with cards for different data categories:
+
+| Section | Description |
+|---------|-------------|
+| **Vessel Info** | Basic vessel parameters including position, velocities, and orientation |
+| **Path Visualization** | 2D trajectory visualization showing vessel movement in X-Y plane |
+| **Vessel Velocities** | Charts for surge (u), sway (v), and heave (w) velocities |
+| **Vessel Angular Rates** | Charts for roll rate (p), pitch rate (q), and yaw rate (r) |
+| **Orientation** | Charts for roll (ϕ), pitch (θ), and yaw (ψ) angles |
+| **Control Surfaces** | Visual representation of control surface positions |
+| **Thrusters** | Visual representation of thruster RPMs |
+
+### Real-time Data Updates
+
+The dashboard updates in real-time with configurable update rates. Data collection begins automatically when connecting to a vessel and includes:
+
+- Subscribe to `/[vessel_name]/odometry_sim` for position and velocity data
+- Subscribe to `/[vessel_name]/vessel_state` for complete vessel state including actuators
+- Optional subscription to additional sensor topics
+
+## 3D Visualization
+
+The 3D visualization (vessel3d.html) provides an interactive three-dimensional view of the vessel in its environment.
+
+### Key Features
+
+1. **Real-time Movement**: The vessel model moves and rotates according to simulation data
+2. **Trajectory Path**: A colored trail showing the vessel's path through the environment
+3. **Customizable View**: Camera controls for rotating, panning, and zooming
+4. **Vessel Dimensions**: Adjustable vessel size and proportions to match different vessel types
+5. **Full-screen Mode**: Expand the visualization to utilize the entire screen
+
+### Controls
+
+The 3D view offers several interactive controls:
+
+- **Orbit**: Click and drag to rotate the camera around the vessel
+- **Pan**: Right-click and drag (or middle-click and drag) to move the camera
+- **Zoom**: Scroll wheel to zoom in and out
+- **Reset Camera**: Button to restore the default camera position
+- **Fullscreen**: Button to toggle fullscreen mode
+
+### Vessel Model Customization
+
+You can adjust the vessel's appearance through the control panel:
+
+- **Vessel Size**: Overall scaling of the vessel model
+- **Dimensions**: Individual control over length, width, and height proportions
+- **Apply Changes**: Button to update the model with the new dimensions
+
+## Integration with ROS2
+
+The visualization dashboard communicates with ROS2 using the ROS Bridge Server, which provides WebSocket connectivity between the ROS2 environment and web clients.
+
+### Communication Flow
+
+1. **ROS2 Topics to WebSockets**: The ROS Bridge Server converts ROS2 topic messages to WebSocket messages
+2. **Web Client Processing**: JavaScript code processes the WebSocket messages and updates the visualizations
+3. **Bidirectional Communication**: The system supports both subscribing to and publishing ROS2 topics
+
+### Required ROS2 Components
+
+To enable the visualization, the launch file includes:
+
+```python
+# HTTP server for web files
+ExecuteProcess(
+    cmd=['python3', '-m', 'http.server', '8000', '--directory', web_build_dir],
+    name='http_server',
+    output='screen'
+),
+
+# ROS Bridge server for WebSocket communication
+IncludeLaunchDescription(
+    AnyLaunchDescriptionSource(rosbridge_launch)
+),
+```
+
+### Topic Subscriptions
+
+The visualization automatically discovers vessel topics by querying available ROS2 topics. It looks for the following patterns:
+
+- `/<vessel_name>/odometry_sim`: For vessel position and velocity
+- `/<vessel_name>/vessel_state`: For complete vessel state including actuators
+
+## Implementation Details
+
+The visualization dashboard is built using modern web technologies:
+
+- **Chart.js**: For responsive, interactive data visualization
+- **three.js**: For 3D rendering of the vessel
+- **roslibjs**: For ROS2 communication via WebSockets
+- **Responsive Design**: Automatically adapts to different screen sizes
+
+### Key JavaScript Components
+
+The system is organized into the following components:
+
+1. **VesselManager**: Handles vessel discovery, selection, and configuration
+2. **VesselVisualizer**: Manages data collection, processing, and visualization
+3. **3D Rendering**: Handles the three-dimensional visualization of vessels
+
+### Vessel State Representation
+
+The dashboard visualizes the complete vessel state model:
+
+- **Position**: x, y, z (in meters)
+- **Linear Velocity**: u, v, w (in m/s)
+- **Angular Velocity**: p, q, r (in rad/s)
+- **Orientation**: ϕ, θ, ψ (in degrees)
+- **Actuators**: Control surface angles (in degrees) and thruster RPMs
+
+## Customization Options
+
+The visualization can be customized in several ways:
+
+1. **Update Rates**: Chart refresh rates can be adjusted
+2. **Data Window**: The amount of historical data displayed in charts
+3. **Vessel Configuration**: The number of control surfaces and thrusters displayed
+4. **3D Model**: Vessel dimensions and appearance
+5. **Chart Scaling**: Auto-rescaling and manual zoom/pan on charts
+
+## Troubleshooting
+
+### Connection Issues
+
+If the dashboard shows "Disconnected" status:
+
+1. Ensure the ROS Bridge server is running
+2. Check that WebSocket port 9090 is accessible
+3. Verify the simulator is publishing required topics
+
+### Missing Vessel Data
+
+If vessel data isn't displaying:
+
+1. Select a vessel from the dropdown menu
+2. Check ROS2 topics are being published:
+   ```bash
+   ros2 topic list | grep vessel
+   ```
+3. Verify message publication with:
+   ```bash
+   ros2 topic echo /<vessel_name>/odometry_sim
+   ```
+
+### Browser Compatibility
+
+The visualization works best with modern browsers:
+
+- Google Chrome 
+- Mozilla Firefox   
+- Microsoft Edge
+- Brave Browser
+
+## Conclusion
+
+The Panisim visualization dashboard provides a comprehensive interface for monitoring and interacting with simulated vessels. With its real-time updates, interactive charts, and 3D visualization, it offers a powerful tool for understanding vessel behavior and validating custom control or guidance algorithms.

@@ -1,0 +1,25 @@
+# KVLCC2 L x B x T = 320.0 x 58.0 x 20.8 
+# BCS @ MS-WL-CL || CoG from MS, WL, CL = 11.158, 0, -2.20
+#--------------------------------------------------------------------------------------------------
+*start_read
+
+# Inputs for ROLL_DAMP (Roll Damping Module of SIMDYN)
+#--------------------------------------------------------------------------------------------------
+*job_name kvlcc2
+
+*himeno
+*lengthbp 320.0
+*breadth 58.0
+*draft 20.8
+*xbody 0.0 0.0 0.0 0.0
+
+*gyration_radii
+23.3040769	0	4.954553461
+0	80.07104856	0
+4.954553461	0	80.06970713
+
+*vcg -2.200
+*forward_speed 0.0
+*wave_direction 90.0
+
+*end_read

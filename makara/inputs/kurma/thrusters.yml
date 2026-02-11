@@ -1,0 +1,12 @@
+thrusters: 
+  - 
+    thruster_name: propeller
+    thruster_id: 1
+    thruster_location: [0.0, 0.0, 0.0]    # With respect to BODY frame
+    thruster_orientation: [0.0, 0.0, 0.0]  # With respect to BODY frame
+    T_prop: 1.0
+    D_prop: 0.1
+    tp: 0.1
+    KT_at_J0: 0.0 
+    n_max: 1000 # in RPM
+    J_vs_KT: None # File path to J_vs_KT.csv, Not being used currently

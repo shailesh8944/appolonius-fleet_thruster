@@ -1,0 +1,3 @@
+The average score across all teams was 200.5, with the best team achieving a score of 31.0.
+
+Teams that successfully tracked more waypoints generally had better scores.

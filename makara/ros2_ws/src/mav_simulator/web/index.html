@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vessel Simulation Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0/dist/chartjs-plugin-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/roslibjs/1.1.0/roslib.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #2196F3;
+      --primary-light: #64B5F6;
+      --primary-dark: #1976D2;
+      --accent-color: #FF4081;
+      --success-color: #4CAF50;
+      --warning-color: #FF9800;
+      --error-color: #f44336;
+      --background-color: #f5f5f5;
+      --card-background: #ffffff;
+      --text-primary: #2c3e50;
+      --text-secondary: #666666;
+      --border-radius: 12px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --transition-speed: 0.3s;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      padding: 25px;
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: var(--box-shadow);
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .connection-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 16px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .vessel-selector {
+      position: fixed;
+      top: 25px;
+      right: 25px;
+      z-index: 1000;
+      background: white;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 280px;
+      transition: transform var(--transition-speed);
+    }
+
+    .vessel-selector:hover {
+      transform: translateY(-3px);
+    }
+
+    .vessel-selector select, 
+    .vessel-selector input,
+    .vessel-selector button {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      font-size: 14px;
+      transition: all var(--transition-speed);
+    }
+
+    .vessel-selector button {
+      background-color: var(--primary-color);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .vessel-selector button.secondary {
+      background-color: #f0f0f0;
+      color: var(--text-primary);
+    }
+
+    .vessel-selector button.secondary:hover {
+      background-color: #e0e0e0;
+      color: var(--text-primary);
+    }
+
+    .vessel-selector button:hover {
+      background-color: var(--primary-dark);
+      color: #fff;
+    }
+
+    .selector-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .active-vessels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 32px;
+    }
+
+    .vessel-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background-color: rgba(33, 150, 243, 0.1);
+      color: var(--primary-dark);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .vessel-chip span {
+      font-weight: 500;
+    }
+
+    .vessel-chip button {
+      background: transparent;
+      border: none;
+      color: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .vessel-selector select:focus,
+    .vessel-selector input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    }
+
+    .config-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 12px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+    }
+
+    .config-form label {
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .config-form button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color var(--transition-speed);
+    }
+
+    .config-form button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .config-info {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      padding: 8px 0;
+      text-align: center;
+      border-top: 1px solid #eee;
+      margin-top: 5px;
+    }
+
+    .card {
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 25px;
+      transition: all var(--transition-speed);
+      overflow: hidden;
+    }
+
+    .global-path-card {
+      margin: 0 25px 30px 25px;
+    }
+
+    .global-path-card .chart-container {
+      height: 380px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+      margin: 0 0 20px 0;
+      color: var(--text-primary);
+      font-size: 1.25rem;
+      font-weight: 500;
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+
+    .vessel-dashboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+      padding: 0 25px 40px;
+    }
+
+    .vessel-panel {
+      background: transparent;
+      border-radius: var(--border-radius);
+      box-shadow: none;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      background: #fff;
+      border-radius: var(--border-radius);
+      padding: 15px 20px;
+      box-shadow: var(--box-shadow);
+    }
+
+    .panel-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+    }
+
+    .panel-status {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .panel-status.connected {
+      color: var(--success-color);
+    }
+
+    .panel-status.stale {
+      color: var(--warning-color);
+    }
+
+    .panel-status.disconnected {
+      color: var(--error-color);
+    }
+
+    .panel-remove {
+      border: none;
+      background: #ffe6e6;
+      padding: 8px 16px;
+      border-radius: 20px;
+      color: #d32f2f;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color var(--transition-speed);
+    }
+
+    .panel-remove:hover {
+      background: #ffcdd2;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .vessel-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .info-item {
+      background: linear-gradient(to bottom, #f8f9fa, #f1f3f5);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid #eaecef;
+      transition: transform var(--transition-speed);
+    }
+
+    .info-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+      transition: background-color var(--transition-speed);
+    }
+
+    .status-connected {
+      background-color: var(--success-color);
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+      animation: pulse 2s infinite;
+    }
+
+    .status-disconnected {
+      background-color: var(--error-color);
+      box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
+    }
+
+    .status-stale {
+      background-color: var(--warning-color);
+      box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+    }
+
+    @media (max-width: 960px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+        padding: 15px;
+      }
+      
+      .vessel-selector {
+        position: static;
+        margin: 0 15px 20px 15px;
+        width: auto;
+      }
+      
+      .header {
+        padding: 1rem;
+        margin-bottom: 15px;
+      }
+      
+      .card {
+        padding: 15px;
+      }
+      
+      .chart-container {
+        height: 280px;
+      }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
+
+    .chart-disconnected {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 10;
+      border-radius: 5px;
+    }
+
+    .chart-disconnected.active {
+      opacity: 1;
+    }
+
+    .disconnect-message {
+      color: #ff5252;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 5px;
+      border: 1px solid #ff5252;
+      box-shadow: 0 0 10px rgba(255, 82, 82, 0.5);
+    }
+
+    .chart-control-btn {
+      position: absolute;
+      padding: 6px 12px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+      color: var(--text-primary);
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .chart-control-btn:hover {
+      background-color: #0056b3;
+    }
+    
+    .chart-control-btn:active {
+      transform: translateY(0px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .path-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    
+    .chart-help-text {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      font-size: 11px;
+      color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 3px 8px;
+      border-radius: 4px;
+      pointer-events: none;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    /* Current position marker styling */
+    .position-marker {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background-color: #36A2EB;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px rgba(54, 162, 235, 0.4);
+      transform: translate(-50%, -50%);
+      z-index: 5;
+    }
+
+    .view3d-button {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background-color: var(--primary-dark);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color var(--transition-speed);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+    }
+    
+    .view3d-button:hover {
+      background-color: var(--accent-color);
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.Chart) {
+        if (window.ChartZoom) {
+          Chart.register(ChartZoom);
+          console.log('Chartjs-plugin-zoom registered on page load');
+        }
+        
+        if (window.ChartAnnotation) {
+          Chart.register(ChartAnnotation);
+          console.log('Chartjs-plugin-annotation registered on page load');
+        }
+      }
+      
+      const openBtn = document.getElementById('open3dView');
+      if (openBtn) {
+        openBtn.addEventListener('click', () => {
+          const url = `${window.location.origin}/vessel3d.html`;
+          window.open(url, '_blank', 'width=1024,height=768,noopener');
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="header">
+    <h1>Vessel Simulation Dashboard</h1>
+    <div class="connection-status">
+      <span class="status-indicator" id="connectionStatus"></span>
+      <span id="connectionText">Disconnected</span>
+    </div>
+    <button id="open3dView" class="view3d-button">Open 3D View</button>
+  </div>
+
+  <div class="card global-path-card">
+    <h2>Combined Vessel Paths</h2>
+    <div class="chart-container">
+      <canvas id="globalPathChart"></canvas>
+      <div class="chart-help-text">Each color represents a vessel; dotted circle shows 1m capture radius for evaders.</div>
+    </div>
+  </div>
+  <div id="emptyState" class="empty-state">
+    Vessels will appear here automatically when data streams in.
+  </div>
+
+  <div id="dashboardHost" class="vessel-dashboard-list"></div>
+
+  <!-- Hidden controls preserved for compatibility -->
+  <div id="vesselControlStub" style="display:none; visibility:hidden;">
+    <select id="vesselSelect">
+      <option value="">Select Vessel</option>
+    </select>
+    <button id="addVesselBtn" type="button">Add Vessel</button>
+    <button id="clearVesselsBtn" type="button">Clear All</button>
+    <div id="activeVesselsList"></div>
+    <input type="number" id="controlSurfacesInput" value="0" />
+    <input type="number" id="thrustersInput" value="0" />
+    <button id="applyConfig" type="button">Apply</button>
+  </div>
+
+  <template id="vesselDashboardTemplate">
+    <section class="vessel-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h2 class="vessel-title">Vessel Name</h2>
+          <div class="panel-status" data-role="status">Connecting…</div>
+        </div>
+        <button type="button" class="panel-remove" data-role="remove">Remove</button>
+      </div>
+      <div class="dashboard">
+        <div class="card">
+          <h2>Vessel Information</h2>
+          <div class="vessel-info" id="vesselInfo">
+            <!-- Dynamic vessel info inserted here -->
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Path</h2>
+          <div class="chart-container">
+            <canvas id="pathChart"></canvas>
+            <div class="chart-help-text">Scroll to zoom, Ctrl+drag to pan</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Position (m)</h2>
+          <div class="chart-container">
+            <canvas id="positionChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Velocity (m/s)</h2>
+          <div class="chart-container">
+            <canvas id="velocityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Angular Velocity (rad/s)</h2>
+          <div class="chart-container">
+            <canvas id="angularVelocityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Euler Angles (degrees)</h2>
+          <div class="chart-container">
+            <canvas id="orientationChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Control Surfaces</h2>
+          <div class="chart-container" id="controlSurfacesChart"></div>
+        </div>
+
+        <div class="card">
+          <h2>Thrusters</h2>
+          <div class="chart-container" id="thrustersChart"></div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <script src="main.js"></script>
+</body>
+</html>

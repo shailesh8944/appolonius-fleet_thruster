@@ -1,0 +1,15 @@
+hydra_file: /workspaces/mavlab/inputs/sookshma/HydRA/matlab/sookshma_hydra.json
+dim_flag: false
+cross_flow_drag: false
+coriolis_flag: false # For linear dynamic model
+
+# Surge hydrodynamic derivatives
+X_u: -0.01
+
+# Sway hydrodynamic derivatives
+Y_v: -0.010659050686665396
+Y_r: 0.0017799664706713543
+
+# Yaw hydrodynamic derivatives
+N_v: -0.0006242757399292063
+N_r: -0.001889456681929024

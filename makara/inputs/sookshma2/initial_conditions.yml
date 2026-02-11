@@ -1,0 +1,4 @@
+start_location: [15, 16.34, 0]
+start_orientation: [0, 0, -1.0472]
+start_velocity: [0.38, 0, 0, 0, 0, 0]
+use_quaternion: false

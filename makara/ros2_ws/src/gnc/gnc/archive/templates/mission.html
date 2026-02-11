@@ -1,0 +1,224 @@
+{% extends "template.html" %}
+
+{% block title %}Mission{% endblock %}
+
+{% block extra_head %}
+<script>
+    async function fetchTopics() {
+        const response = await fetch('/get_topics');
+        let topics_of_topics = await response.json();
+        let topics = topics_of_topics.topics        
+        
+        const topicListDiv = document.getElementById('topicForm');
+        topicListDiv.innerHTML = '<p>No active topics</p>'; // Clear existing checkboxes
+
+        topics.forEach(topic => {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = topic;
+            checkbox.id = topic; // Give it an ID if needed
+            checkbox.name = 'ros-topics'
+
+            const label = document.createElement('label');
+            label.htmlFor = topic;
+            label.appendChild(document.createTextNode(topic));
+
+            topicListDiv.appendChild(checkbox);
+            topicListDiv.appendChild(label);
+            topicListDiv.appendChild(document.createElement('br')); // Line break
+        });
+    }   
+
+    // Function to fetch currently launched packages
+    function fetchActiveLaunches() {
+        fetch('/active_launches')
+            .then(response => response.json())
+            .then(data => {
+                const activeLaunchesDiv = document.getElementById('active-launches');
+                activeLaunchesDiv.innerHTML = ''; // Clear the existing list
+
+                if (data.length === 0) {
+                    activeLaunchesDiv.innerHTML = '<p>No active launches</p>';
+                    return;
+                }
+
+                // Display each active launch with a "Reset" and "Stop" button
+                data.forEach(launch => {
+                    const launchItem = document.createElement('div');
+                    launchItem.className = 'launch-item'; // Specify the class name
+                    launchItem.innerHTML = `
+                        <p>${launch.package} - ${launch.launch_file} (PID: ${launch.pid})</p>
+                        <button style="display: inline-block; margin-left: 10px;" onclick="resetLaunch('${launch.package}', '${launch.launch_file}')">Reset</button>
+                        <button style="display: inline-block; margin-left: 10px;" onclick="stopLaunch('${launch.package}', '${launch.launch_file}')">Stop</button>
+                    `;
+                    activeLaunchesDiv.appendChild(launchItem);
+                });                
+            })
+            .catch(error => console.error('Error fetching active launches:', error));
+    }
+
+    // Function to start selected ROS 2 packages
+    function startRos2() {
+        const checkboxes = document.querySelectorAll('input[name="package_launch"]:checked');
+        const selectedPackages = Array.from(checkboxes).map(cb => cb.value);
+
+        if (selectedPackages.length === 0) {
+            alert('Please select at least one package to launch.');
+            return;
+        }
+
+        fetch('/start_ros2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ package_launch: selectedPackages })
+        })
+        .then(response => response.json())
+        .then(data => {
+            let message = '';
+            let errorMessages = '';
+
+            data.forEach(item => {
+                if (item.message) {                    
+                    message += item.message + '\n';
+                }
+                if (item.error) {                    
+                    errorMessages += item.error + '\n';
+                }
+            });
+            // alert(message);
+            if (errorMessages) {
+                alert(errorMessages); // Show errors if any
+            }
+            
+            // fetchActiveLaunches(); // Refresh the list of active launches
+            setTimeout(fetchActiveLaunches, 200);
+        })
+        .catch(error => console.error('Error starting launches:', error));
+    }
+
+    // Function to reset a launch
+    function resetLaunch(packageName, launchFile) {
+        fetch('/reset_ros2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ package: packageName, launch_file: launchFile })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // alert(data.message || data.error);
+            if (data.error) {
+                alert(data.error); // Show error if any
+            }
+            fetchActiveLaunches(); // Refresh the list of active launches
+        })
+        .catch(error => console.error('Error resetting launch:', error));
+    }
+
+    // Function to stop a launch
+    function stopLaunch(packageName, launchFile) {
+        fetch('/stop_ros2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ package: packageName, launch_file: launchFile })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // alert(data.message || data.error);
+            if (data.error) {
+                alert(data.error); // Show error if any
+            }
+            fetchActiveLaunches(); // Refresh the list of active launches
+        })
+        .catch(error => console.error('Error stopping launch:', error));
+    }
+
+    // Function to start ROS 2 bag
+    function startRos2Bag() {
+        const checkedTopics = Array.from(document.querySelectorAll('input[name="ros-topics"]:checked'))
+            .map(checkbox => checkbox.value);
+        const rosbagInput = document.querySelectorAll('input[name="rosbag"]');
+        const bagName = rosbagInput[0].value.trim();
+        console.log(checkedTopics);
+        
+        if (!bagName) {
+            alert('Please specify the bag name to record');
+            return;
+        }
+
+        fetch('/start_rosbag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                topics: checkedTopics,
+                filename: bagName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error); // Show error if any
+            }
+
+            // fetchActiveLaunches(); // Refresh the list of active launches
+            setTimeout(fetchActiveLaunches, 200);
+        })
+        .catch(error => console.error('Error starting ros2 bag:', error));
+    }
+
+    // Fetch the active launches when the page loads
+    window.onload = fetchActiveLaunches;
+    
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>Mission Page</h1>
+<!-- <p>Select the packages to launch</p> -->
+<div class="centered-div-flex">
+    <h3>Select the packages to launch</h3>    
+</div>
+
+<div class="centered-div-flex" id="ros2-checkboxes">
+    <form onsubmit="event.preventDefault(); startRos2();">
+        <!-- <label>Available ROS 2 Packages to Launch:</label><br> -->
+        <input type="checkbox" name="package_launch" value="sbg_driver:sbg_device_launch.py"> SBG <br>
+        <input type="checkbox" name="package_launch" value="ublox_gps:ublox_gps_node-launch.py"> Ardusimple <br>
+        <input type="checkbox" name="package_launch" value="gnc:nav_launch.py"> Navigation<br>
+        <input type="checkbox" name="package_launch" value="gnc:gc_launch.py"> Guidance and Control<br>
+        <input type="checkbox" name="package_launch" value="mav_simulator:mav_simulator_launch.py"> MAV Simulator<br>
+        <!-- <input type="checkbox" name="package_launch" value="package3:launch3.launch.py"> Package 3 - Launch 3<br> -->
+        <!-- Add more package-launch combinations as needed -->
+        <br>
+        <button type="submit">Launch ROS2 Packages</button>
+    </form>
+</div>
+<br>
+<div class="centered-div-flex">
+    <h3>Start Recording ROS 2 Bag:</h3>    
+</div>
+<div class="centered-div-flex">
+    <button id="loadTopics" onclick="fetchTopics();">Load Topics</button>    
+</div>
+<br>
+<div class="centered-div-flex">
+    <form id="topicForm"></form>
+</div>
+<br>
+<div class="centered-div-flex" id="ros2-bag-input">
+    <form onsubmit="event.preventDefault(); startRos2Bag();">
+        <!-- <label for="rosbag_record_launch">Start Recording ROS 2 Bag:</label><br> -->
+        <input type="text" id="rosbag_record_launch" name="rosbag" placeholder="rosbag_filename" required>
+        <button type="submit">Start Recording</button>
+    </form>
+</div>
+<br>
+<div class="centered-div-flex">
+    <h3>Currently Launched Packages </h3>
+    <button style="display: inline-block; margin-left: 10px;" onclick="fetchActiveLaunches()">Refresh</button>
+</div>
+<div class="centered-div-flex" id="active-launches">
+    <!-- Active launches will be dynamically populated here -->
+</div>
+
+
+{% endblock %}

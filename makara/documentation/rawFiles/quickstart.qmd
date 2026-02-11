@@ -1,0 +1,85 @@
+# Quickstart {.unnumbered}
+
+After building the Docker image, you can start the simulator:
+
+1.  From the root directory of the repository, run the following script in your terminal:
+
+    ```bash
+    ./ros2_simulator.sh
+    ```
+
+2.  Once the simulator starts, it will display the ROS2 topics available in the terminal. You should see an output similar to this:
+
+    ```output
+   ==================================================
+   🚀 ROS2 Simulation Started Successfully!
+   ==================================================
+
+    📡 Available ROS2 Topics:
+    ------------------------------
+    /parameter_events
+    /rosout
+    /sookshma_00/Rudder_1/encoder
+    /sookshma_00/actuator_cmd
+    /sookshma_00/imu/data
+    /sookshma_00/odometry
+    /sookshma_00/odometry_sim
+    /sookshma_00/uwb
+    /sookshma_00/vessel_state
+    /sookshma_00/vessel_states_ekf
+    /sookshma_00/waypoints
+
+    🔍 View Topic Data:
+    ------------------------------
+    1. Open a new terminal:
+        docker exec -it panisim bash
+
+    2. Subscribe to a topic:
+        ros2 topic echo <topic_name>
+
+    📝 Example:
+        ros2 topic echo /vessel_0/odometry_sim
+
+    ==================================================
+
+    ```
+
+    To inspect the data published on these topics, follow these steps:
+
+    a. Open a new terminal window.
+
+    b. Enter the Docker container by executing the following command in a new terminal:
+
+    ```bash
+    docker exec -it panisim bash
+    ```
+
+    c.  Subscribe to a specific topic using the `ros2 topic echo` command. Replace `<topic_name>` with the actual topic you want to inspect.
+
+    ```bash
+    ros2 topic echo <topic_name>
+    ```
+
+    For example, to view the odometry data for `mavymini_00`, you would use:
+
+    ```bash
+    ros2 topic echo /sookshma_00/odometry_sim
+    ```
+
+::: callout-note
+The specific topic names may vary depending on the agents activated in your `/inputs/simulation_input.yml` configuration file.
+:::
+
+Currently, the example vessel is configure with an initial velocity of 0.5m/s. (You can change this by editing the `/inputs/simulation_input.yml` file.)
+
+A Web-based visualization GUI would have started automatically. You can access it by opening a new browser tab and navigating to `http://localhost:8000`.
+
+![Web-based visualization GUI](../images/simVis.png)
+
+This visualization GUI shows you the current state of the vessel, including its position, velocity, orientation and actuator data.
+
+You can also see the 6 DOF of the vessel via the "Open 3D View" button. A new window will appear showing you a box shaped vessel with its position and orientation in the simulation.
+
+![3D View](../images/threeDvis.png)
+
+And that's it! The simulation is up and running and now you can start any other ROS nodes to command the vessel actuators, perform Extended Kalman Filtering, or anything else you want. We will be covering a waypoint tracking example to show you how you can write your own ROS2 nodes to control your vessel.

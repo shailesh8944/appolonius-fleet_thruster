@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live Odometry Visualization</title>
+  <!-- Include Chart.js (from CDN or your local node_modules build) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Include ROSLIBJS (from your node_modules or a CDN) -->  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/roslibjs/1.1.0/roslib.min.js" integrity="sha512-x2Owc9WayRcRj80Znkau58shVfXN2OIX+gQAlrx6KPugZBKrIC6AwgEWQQCI06p2Q8RB4ilxD+y+1BdNd+1fQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    h1, h2 {
+      color: #2c3e50;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    .chart-container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      margin: 10px auto;
+      display: block;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    #actuatorCharts {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 15px;
+    }
+
+    #actuatorCharts canvas {
+      height: 200px !important;
+      width: 100% !important;
+    }
+
+    #actuatorCharts .chart-container {
+      padding: 10px;
+      margin: 0;
+      min-height: 250px;
+    }
+
+    #actuatorCharts h3 {
+      font-size: 1.2em;
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Odometry Data Visualization</h1>
+
+  <div class="chart-container full-width">
+    <h2>Path</h2>
+    <canvas id="pathChart"></canvas>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-container">
+      <h2>X Position (m)</h2>
+      <canvas id="xPositionChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Y Position (m)</h2>
+      <canvas id="yPositionChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Z Position (m)</h2>
+      <canvas id="zPositionChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Surge Velocity (m/s)</h2>
+      <canvas id="uVelocityChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Sway Velocity (m/s)</h2>
+      <canvas id="vVelocityChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Heave Velocity (m/s)</h2>
+      <canvas id="wVelocityChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Roll (degrees)</h2>
+      <canvas id="rollChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Pitch (degrees)</h2>
+      <canvas id="pitchChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Yaw (degrees)</h2>
+      <canvas id="yawChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Roll Angular Velocity (rad/s)</h2>
+      <canvas id="pAngularVelocityChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Pitch Angular Velocity (rad/s)</h2>
+      <canvas id="qAngularVelocityChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Yaw Angular Velocity (rad/s)</h2>
+      <canvas id="rAngularVelocityChart"></canvas>
+    </div>
+
+    <div class="chart-container full-width">
+      <h2>Actuators</h2>
+      <div id="actuatorCharts" class="chart-grid">
+        <!-- Actuator charts will be dynamically added here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript file -->
+  <script src="main.js"></script>
+</body>
+</html>

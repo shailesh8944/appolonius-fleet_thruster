@@ -1,0 +1,103 @@
+# References & Building the Documentation {.unnumbered}
+
+## Building the Documentation
+
+This documentation is built using [Quarto](https://quarto.org/), a modern open-source scientific and technical publishing system.
+
+### Requirements
+
+To build this documentation, you need:
+
+1. [Quarto](https://quarto.org/docs/getting-started/installation.html) (latest version recommended)
+2. Python 3.7+
+3. Optional: VSCode with Quarto extension for interactive editing
+
+### Building the HTML Book
+
+```bash
+cd makara_docs
+quarto render
+```
+
+This will create a `_book` directory with the HTML output.
+
+### Previewing with Live Reload
+
+```bash
+cd makara_docs
+quarto preview
+```
+
+This will start a local server and open the documentation in your browser. The documentation will automatically refresh when you make changes to the source files.
+
+### Building PDF Output
+
+```bash
+cd makara_docs
+quarto render --to pdf
+```
+
+## Extending the Documentation
+
+### Adding New Pages
+
+1. Create a new `.qmd` file in the project directory
+2. Add the file to the `chapters` section in `_quarto.yml`
+3. Rebuild the documentation
+
+### Including Code Examples
+
+```{python}
+#| eval: false
+# This is an example code block
+import numpy as np
+from mav_simulator.class_vessel import Vessel
+
+# Create vessel
+vessel = Vessel(vessel_params, hydro_data, vessel_id=1)
+```
+
+### Adding Math Equations
+
+Inline math: $a^2 + b^2 = c^2$
+
+Display math:
+
+$$F = ma$$
+
+### Including Diagrams
+
+```{mermaid}
+flowchart LR
+    A[Input] --> B{Process}
+    B --> C[Output 1]
+    B --> D[Output 2]
+```
+
+## References
+
+### Official Documentation
+
+- [MAV Simulator GitHub Repository](https://github.com/yourusername/mav_simulator)
+- [ROS2 Documentation](https://docs.ros.org/en/foxy/index.html)
+- [Quarto Documentation](https://quarto.org/docs/guide/)
+
+### Academic References
+
+::: {#refs}
+:::
+
+Fossen, T. I. (2011). Handbook of marine craft hydrodynamics and motion control. John Wiley & Sons.
+
+Fossen, T. I. (2021). Handbook of Marine Craft Hydrodynamics and Motion Control (2nd ed.). Wiley.
+
+Lewis, E. V. (1988). Principles of Naval Architecture: Volume I - Stability and Strength. Society of Naval Architects and Marine Engineers.
+
+### API Reference
+
+Complete API documentation can be generated using [pdoc](https://pdoc.dev/) or [Sphinx](https://www.sphinx-doc.org/).
+
+```bash
+# Generate API documentation with pdoc
+pdoc --html --output-dir api_docs mav_simulator
+```

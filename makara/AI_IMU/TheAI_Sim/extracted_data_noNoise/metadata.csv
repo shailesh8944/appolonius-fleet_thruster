@@ -1,0 +1,2 @@
+bag_dir,csv_path
+../../data/data_from_sim_noNoise/testing,./extracted_data_noNoise/testing/synchronized.csv

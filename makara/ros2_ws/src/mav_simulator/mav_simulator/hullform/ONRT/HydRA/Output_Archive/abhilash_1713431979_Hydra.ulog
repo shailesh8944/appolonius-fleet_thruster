@@ -1,0 +1,99 @@
+----------------------------------------------------------------
+HYDRA run at 18 April 2024 09:19:39
+----------------------------------------------------------------
+User ID: abhilash
+Job ID: 1713431979
+INFO : Reading input file
+WARN : Group number not set for vessel 1. Default group set to 0
+INFO : Finished reading input file
+INFO : Calculating Hydrostatics
+INFO : Processing grid of body 1
+INFO : Finished processing grid of body 1
+INFO : Calculating hydrostatics for body 1
+INFO : Finished calculating hydrostatics for body 1
+INFO : Displacements: [8445.56505211 8448.38000977 8450.57335663]
+INFO : CoB: [-2.16412211e+00 -1.07532448e-04 -2.22120021e+00]
+INFO : CoG: [-2.16412211e+00 -1.07532448e-04  2.27700000e+00]
+INFO : WPArea: 2284.928918531283
+INFO : WSA: 3133.5810422689647
+INFO : BMT: 6.5208467645063495
+INFO : BML: 411.7614285948032
+INFO : GMT: 2.02264655724524
+INFO : GML: 407.2632283875421
+INFO : Stiffness Matrix:
+INFO :                            0.0                            0.0                            0.0                            0.0                            0.0                            0.0 
+INFO :                            0.0                            0.0                            0.0                            0.0                            0.0                            0.0 
+INFO :                            0.0                            0.0             22967685.633387677              379.1120631987653             246429029.04800022                            0.0 
+INFO :                            0.0                            0.0              379.1120631987653             171810901.51580933              19665.70311367723                            0.0 
+INFO :                            0.0                            0.0             246429029.04800022              19665.70311367723              34594409078.96526                            0.0 
+INFO :                            0.0                            0.0                            0.0                            0.0                            0.0                            0.0 
+INFO : Mass Matrix:
+INFO :              8661837.690547269                            0.0                            0.0                            0.0              19723004.42137613              931.4286116266233 
+INFO :                            0.0              8661837.690547269                            0.0             -19723004.42137613                            0.0            -18745274.417603403 
+INFO :                            0.0                            0.0              8661837.690547269             -931.4286116266233             18745274.417603403                            0.0 
+INFO :                           -0.0             -19723004.42137613             -931.4286116266233              647145897.7506013                            0.0              51575656.55301644 
+INFO :              19723004.42137613                           -0.0             18745274.417603403                            0.0              12869043090.04796                            0.0 
+INFO :              931.4286116266233            -18745274.417603403                           -0.0              51575656.55301644                            0.0             12861659619.998255 
+INFO : 
+
+INFO : Calculating Radiation and Scattering
+INFO : Frequency 1 of 52: -0.03 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 2 of 52: 0.00 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 3 of 52: 0.03 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 4 of 52: 0.06 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 5 of 52: 0.09 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 6 of 52: 0.12 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 7 of 52: 0.15 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 8 of 52: 0.18 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 9 of 52: 0.21 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 10 of 52: 0.24 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 11 of 52: 0.27 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 12 of 52: 0.30 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 13 of 52: 0.33 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 14 of 52: 0.36 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 15 of 52: 0.39 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 16 of 52: 0.42 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 17 of 52: 0.45 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 18 of 52: 0.48 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 19 of 52: 0.51 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 20 of 52: 0.54 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 21 of 52: 0.57 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 22 of 52: 0.60 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 23 of 52: 0.63 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 24 of 52: 0.66 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 25 of 52: 0.69 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 26 of 52: 0.72 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 27 of 52: 0.75 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 28 of 52: 0.78 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 29 of 52: 0.81 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 30 of 52: 0.84 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 31 of 52: 0.87 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 32 of 52: 0.90 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 33 of 52: 0.93 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 34 of 52: 0.96 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 35 of 52: 0.99 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 36 of 52: 1.02 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 37 of 52: 1.05 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 38 of 52: 1.08 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 39 of 52: 1.11 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 40 of 52: 1.14 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 41 of 52: 1.17 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 42 of 52: 1.20 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 43 of 52: 1.23 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 44 of 52: 1.26 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 45 of 52: 1.29 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 46 of 52: 1.32 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 47 of 52: 1.35 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 48 of 52: 1.38 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 49 of 52: 1.41 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 50 of 52: 1.44 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 51 of 52: 1.47 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 52 of 52: 1.50 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Finished calculating frequency domain scattering and radiation forces
+INFO : Generating Output
+INFO : Writing output files
+INFO : Writing MAT files
+INFO : STATUS: Finished writing MAT files
+INFO : STATUS: Finished writing output files
+INFO : Hydra Run Completed Successfully
+INFO : Execution Time: 3.21 minutes

@@ -1,0 +1,142 @@
+{% extends "template.html" %}
+
+{% block title %}Odometry Plots{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+    #map { height: 800px; width: 100%; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Map Page</h1>
+
+<!-- Flexbox example -->
+<div id="messages"></div>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+    // Coordinates for the center location
+  const centerLat = 12.993639;
+  const centerLng = 80.239377;
+
+  // Initialize the map at the specified center and zoom level
+  var map = L.map('map').setView([centerLat, centerLng], 19);
+
+  // Add OpenStreetMap tiles
+//   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+//     maxZoom: 22
+//   }).addTo(map);
+
+  // Add Esri Satellite tiles
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Map data &copy; <a href="https://www.esri.com">Esri</a>',
+    maxZoom: 19
+  }).addTo(map);
+
+  // Add a circle to represent the 500-meter radius
+//   L.circle([centerLat, centerLng], {
+//     color: 'blue',
+//     fillColor: '#30a3ec',
+//     fillOpacity: 0.3,
+//     radius: 500 // radius in meters
+//   }).addTo(map).bindPopup("500m Radius from Center");
+
+  // Create a polyline for the GPS path
+  var gpsPath = L.polyline([], { color: 'white' }).addTo(map);
+  var gpsGeofence = L.polyline([], { color: 'red' }).addTo(map);
+  var gpsGeofence_flag = true;
+
+  // Function to update the map with new GPS coordinates
+  function updateMap(latitude, longitude) {
+    // Add the new GPS point to the path
+    gpsPath.addLatLng([latitude, longitude]);
+    // Center the map on the new GPS point
+    // map.setView([latitude, longitude]);
+  }
+
+  function updateGeofence(latitude, longitude) {
+    // Add the new GPS point to the path
+    gpsGeofence.addLatLng([latitude, longitude]);
+    // Center the map on the new GPS point
+    // map.setView([latitude, longitude]);
+  }
+
+  // Simulate a stream of GPS data within a limited area around the center
+  // setInterval(() => {
+  //   // Generate random GPS points within ~500m of the center
+  //   const randomLat = centerLat + (Math.random() - 0.5) * 0.001;
+  //   const randomLng = centerLng + (Math.random() - 0.5) * 0.001;
+  //   updateMap(randomLat, randomLng);
+  // }, 1000); // Updates every second
+  
+  
+  // const socket = new WebSocket('http://localhost:8500/socket.io/?EIO=4&transport=websocket');
+  const socket = new io('http://localhost:8500');
+
+  socket.onopen = () => {
+        console.log("Connected to WebSocket server");
+  };
+
+  socket.on('message', (data) => {
+      console.log(data);
+  });
+
+  socket.on('state', (data) => {
+        console.log(data);
+        const messageDiv = document.getElementById('messages');
+        odom_str = `<p>Time: ${data.odometry[0].toFixed(2)} sec </p>`
+        odom_str += `<p>Surge Velocity: ${data.odometry[1].toFixed(2)} m/s `
+        odom_str += `Sway Velocity: ${data.odometry[2].toFixed(2)} m/s `
+        odom_str += `Heave Velocity: ${data.odometry[3].toFixed(2)} m/s </p>`
+        odom_str += `<p>Roll Velocity: ${data.odometry[4].toFixed(2)} rad/s `
+        odom_str += `Pitch Velocity: ${data.odometry[5].toFixed(2)} rad/s `
+        odom_str += `Yaw Velocity: ${data.odometry[6].toFixed(2)} rad/s </p>`
+        odom_str += `<p>Surge: ${data.odometry[7].toFixed(2)} m `
+        odom_str += `Sway: ${data.odometry[8].toFixed(2)} m `
+        odom_str += `Heave: ${data.odometry[9].toFixed(2)} m </p>`
+        odom_str += `<p>Roll: ${data.odometry[10].toFixed(2)} deg `
+        odom_str += `Pitch: ${data.odometry[11].toFixed(2)} deg `
+        odom_str += `Yaw: ${data.odometry[12].toFixed(2)} deg </p>`
+        odom_str += `<p>Rudder: ${data.encoders[1].toFixed(2)} deg `
+        odom_str += `Propeller RPM: ${data.encoders[2].toFixed(2)}  </p>`
+        messageDiv.innerHTML = odom_str;
+        let newLat = data.gps[0];
+        let newLng = data.gps[1];
+        updateMap(newLat, newLng);
+        
+        if (gpsGeofence_flag && data.geofence !== null && data.geofence !== undefined) {
+
+          for (let i = 0; i < data.geofence.length; i++) {
+            updateGeofence(data.geofence[i][0], data.geofence[i][1])
+          }
+
+          gpsGeofence_flag = false;
+
+        }
+  });
+
+  socket.onclose = () => {
+      console.log("WebSocket connection closed");
+  };
+
+  socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+  };
+
+  setInterval(() => {
+    //   console.log('Sending a ping');
+      socket.emit('get_state');
+      // updateMap(newLat, newLng);
+  }, 1000); // Updates every second
+
+</script>
+
+{% endblock %}

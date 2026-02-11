@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAVSIM - {% block title %}Default Title{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('odometry') }}">Odometry</a></li>
+            <li><a href="{{ url_for('odometry_plot') }}">Odometry Plots</a></li>
+            <li><a href="{{ url_for('mission') }}">Mission</a></li>
+            <li><a href="{{ url_for('map') }}">Map</a></li>
+        </ul>
+    </nav>
+
+    {% block content %}{% endblock %}
+</body>
+</html>

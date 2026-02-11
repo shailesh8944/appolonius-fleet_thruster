@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dynamic GPS Map with Centered Location</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 800px; width: 100%; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="messages"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+  // Coordinates for the center location
+  const centerLat = 12.993639;
+  const centerLng = 80.239377;
+
+  // Initialize the map at the specified center and zoom level
+  var map = L.map('map').setView([centerLat, centerLng], 19);
+
+  // Add OpenStreetMap tiles
+//   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+//     maxZoom: 22
+//   }).addTo(map);
+
+  // Add Esri Satellite tiles
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Map data &copy; <a href="https://www.esri.com">Esri</a>',
+    maxZoom: 22
+  }).addTo(map);
+
+  // Add a circle to represent the 500-meter radius
+//   L.circle([centerLat, centerLng], {
+//     color: 'blue',
+//     fillColor: '#30a3ec',
+//     fillOpacity: 0.3,
+//     radius: 500 // radius in meters
+//   }).addTo(map).bindPopup("500m Radius from Center");
+
+  // Create a polyline for the GPS path
+  var gpsPath = L.polyline([], { color: 'red' }).addTo(map);
+
+  // Function to update the map with new GPS coordinates
+  function updateMap(latitude, longitude) {
+    // Add the new GPS point to the path
+    gpsPath.addLatLng([latitude, longitude]);
+    // Center the map on the new GPS point
+    // map.setView([latitude, longitude]);
+  }
+
+  // Simulate a stream of GPS data within a limited area around the center
+  // setInterval(() => {
+  //   // Generate random GPS points within ~500m of the center
+  //   const randomLat = centerLat + (Math.random() - 0.5) * 0.001;
+  //   const randomLng = centerLng + (Math.random() - 0.5) * 0.001;
+  //   updateMap(randomLat, randomLng);
+  // }, 1000); // Updates every second
+  
+  
+  // const socket = new WebSocket('http://localhost:8500/socket.io/?EIO=4&transport=websocket');
+  const socket = new io('http://localhost:8500');
+
+  socket.onopen = () => {
+      console.log("Connected to WebSocket server");
+  };
+
+  // socket.on('message', (data) => {
+  //     console.log(data);
+  // });
+
+  socket.on('state', (data) => {
+      console.log(data);
+  });
+
+  // socket.onmessage = (event) => {
+  //     console.log('I am here')
+  //     const message = JSON.parse(event.data);
+  //     console.log("Message received:", message);
+
+  //     const messageDiv = document.getElementById('messages');
+  //     const newMessage = document.createElement('p');
+  //     newMessage.textContent = `Received: ${message.data}`;
+  //     messageDiv.appendChild(newMessage);
+  // };
+
+  socket.onclose = () => {
+      console.log("WebSocket connection closed");
+  };
+
+  socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+  };
+
+  setInterval(() => {
+      console.log('Sending a ping');
+      socket.emit('get_state');
+      // updateMap(newLat, newLng);
+  }, 1000); // Updates every second
+
+</script>
+
+</body>
+</html>

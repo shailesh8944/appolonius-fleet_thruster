@@ -1,0 +1,45 @@
+project:
+  type: book
+  output-dir: ./docs
+
+book:
+  title: "Pani Simulator"
+  author: "Rishabh Sharma"
+  date: "3/24/2024"
+  repo-url: https://github.com/goldenrishabh/panisim
+  repo-actions: [edit, issue]
+  chapters:
+    - index.qmd
+    - rawFiles/setup.qmd
+    - rawFiles/quickstart.qmd
+    - rawFiles/Kinematics/Kinematics.qmd
+    - rawFiles/Dynamics/Dynamics.qmd
+    - rawFiles/Navigation/sensors.qmd
+    - rawFiles/Inputs/inputs.qmd
+    - rawFiles/ROS2/ros2.qmd
+    - rawFiles/WebConfigurator/web_configurator.qmd
+    - rawFiles/WebVisualization/web_visualization.qmd
+    - rawFiles/Example/example.qmd
+    - rawFiles/NoROS/noros.qmd
+    
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: cyborg
+    toc: true
+    code-fold: true
+    code-tools: true
+    code-link: true
+    code-copy: true
+    highlight-style: github
+  pdf:
+    documentclass: scrreprt
+
+execute:
+  enabled: false
+
+
+

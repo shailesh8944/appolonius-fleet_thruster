@@ -1,0 +1,613 @@
+/**
+ * Marine Vessel CAD Configurator - Core Styles
+ * 
+ * This stylesheet defines the layout, structure, and component styles for the Marine Vessel
+ * CAD Configurator application. It implements a professional CAD-like interface with
+ * responsive sidebars, toolbars, panels, and a 3D viewport.
+ * 
+ * The CSS uses a modular approach with specific sections for:
+ * - Base layout (container, toolbars, sidebars)
+ * - Content panels and property editors
+ * - 3D viewport styling
+ * - Form controls
+ * - Component library
+ * - Responsive adjustments
+ *
+ * Note: Theme-specific colors and visual styles are defined in themes.css
+ */
+
+/* Base layout variables for consistent sizing and spacing */
+:root {
+    /* Layout variables */
+    --border-radius: 4px;
+    --sidebar-width: 300px;
+    --toolbar-height: 40px;
+}
+
+/* Reset default browser styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Base body styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ====== MAIN LAYOUT COMPONENTS ====== */
+
+/* Main container - holds entire application */
+.cad-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* Top toolbar - contains app controls and actions */
+.toolbar {
+    height: var(--toolbar-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    z-index: 10;
+}
+
+/* Application title in toolbar */
+.app-title {
+    font-size: 16px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Toolbar buttons container */
+.toolbar-items {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Individual toolbar button styling */
+.toolbar-btn {
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Divider between toolbar button groups */
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    margin: 0 8px;
+}
+
+/* Main content area - contains sidebars and viewport */
+.main-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ====== SIDEBARS ====== */
+
+/* Left sidebar - contains project explorer and properties */
+.left-sidebar {
+    width: 320px;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    background-color: var(--sidebar-bg);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* Right sidebar - contains component library and simulation settings */
+.right-sidebar {
+    width: 320px;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-right: none;
+    border-left: 1px solid var(--border-color);
+    background-color: var(--sidebar-bg);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* Sidebar tabs navigation */
+.sidebar-tabs {
+    display: flex;
+    height: 40px;
+}
+
+/* Individual sidebar tab */
+.sidebar-tab {
+    padding: 0 15px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 8px;
+}
+
+/* Sidebar content container */
+.sidebar-content {
+    display: none; /* Hidden by default, shown when active */
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    padding-bottom: 16px;
+}
+
+/* Active sidebar content */
+.sidebar-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ====== SCROLLBAR STYLING ====== */
+
+/* Webkit scrollbar styling for sidebar content */
+.sidebar-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 4px;
+}
+
+/* ====== PANELS ====== */
+
+/* Content panels for grouping related controls */
+.panel {
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: var(--panel-bg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+/* Panel header with title and actions */
+.panel-header {
+    padding: 12px 16px;
+    background-color: var(--panel-header-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Panel header title */
+.panel-header h5 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Panel content area */
+.panel-body {
+    padding: 16px;
+    overflow-y: auto;
+    max-height: 500px; /* Prevent extremely tall panels */
+    scrollbar-width: thin;
+}
+
+/* Webkit scrollbar styling for panel content */
+.panel-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-body::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+
+.panel-body::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+}
+
+/* Container for panel action buttons */
+.panel-actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* Icon buttons in panel headers */
+.btn-icon {
+    background-color: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: var(--border-radius);
+}
+
+/* ====== 3D VIEWPORT ====== */
+
+/* Main 3D viewport container */
+.viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Canvas within viewport */
+.viewport canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Overlay for viewport controls */
+.viewport-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+}
+
+/* Viewport tools container */
+.viewport-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 5px;
+    border-radius: var(--border-radius);
+}
+
+/* Individual viewport tool button */
+.viewport-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    font-size: 14px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+/* Forms and inputs */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--input-text-color);
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--accent-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.input-group {
+    display: flex;
+    gap: 5px;
+}
+
+.file-input-group {
+    margin-bottom: 5px;
+}
+
+small.text-muted {
+    font-size: 12px;
+}
+
+/* Component Buttons */
+.component-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.component-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--btn-bg);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    text-align: center;
+    cursor: pointer;
+}
+
+.component-btn:hover {
+    background-color: var(--btn-hover-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.component-btn i {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: var(--accent-color);
+}
+
+/* Hierarchy Tree */
+.hierarchy-tree {
+    font-size: 14px;
+}
+
+.hierarchy-item {
+    padding: 5px 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.hierarchy-toggle {
+    display: inline-block;
+    width: 20px;
+    text-align: center;
+}
+
+.hierarchy-item-content {
+    display: flex;
+    align-items: center;
+    padding: 3px 5px;
+    border-radius: var(--border-radius);
+}
+
+.hierarchy-item-icon {
+    margin-right: 5px;
+    font-size: 14px;
+}
+
+.hierarchy-children {
+    padding-left: 20px;
+}
+
+/* Properties Panel */
+.no-selection-message {
+    font-style: italic;
+    padding: 10px 0;
+}
+
+.property-group {
+    margin-bottom: 15px;
+}
+
+.property-group-title {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+}
+
+.property-row {
+    display: flex;
+    padding: 4px 0;
+}
+
+.property-label {
+    flex: 0 0 40%;
+    padding-right: 10px;
+}
+
+.property-value {
+    flex: 0 0 60%;
+}
+
+/* Modal styles */
+.modal-content {
+    border-radius: var(--border-radius);
+}
+
+/* YAML Generator Modal */
+.yaml-preview-tabs {
+    margin-top: 15px;
+}
+
+.yaml-preview {
+    padding: 10px;
+    border-radius: var(--border-radius);
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Upload indicator */
+.upload-progress {
+    margin-top: 5px;
+    height: 5px;
+    width: 100%;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.upload-progress-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Context menu */
+.context-menu {
+    position: absolute;
+    z-index: 100;
+    border-radius: var(--border-radius);
+    min-width: 150px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.context-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .left-sidebar, .right-sidebar {
+        width: 280px;
+    }
+}
+
+@media (max-width: 992px) {
+    .left-sidebar, .right-sidebar {
+        width: 250px;
+    }
+    
+    .panel-header {
+        padding: 10px 12px;
+    }
+    
+    .panel-body {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .left-sidebar, .right-sidebar {
+        position: absolute;
+        z-index: 10;
+        height: calc(100% - var(--toolbar-height));
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .right-sidebar {
+        right: 0;
+        transform: translateX(100%);
+    }
+    
+    .left-sidebar.visible {
+        transform: translateX(0);
+    }
+    
+    .right-sidebar.visible {
+        transform: translateX(0);
+    }
+}
+
+/* Notification styling */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    font-weight: 500;
+    z-index: 10000;
+    animation: slideIn 0.3s forwards;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Improve accessibility */
+input, select, button {
+    font-size: 14px !important;
+}
+
+.form-label, .form-check-label {
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--label-color);
+}
+
+/* Geofence Map Styling */
+#geofence-map {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+#geofence-map:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.datum-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.geofence-vertex {
+    cursor: pointer;
+}
+
+/* Make the map controls look better on dark theme */
+[data-bs-theme="dark"] .leaflet-bar a {
+    background-color: #333;
+    color: #fff;
+    border-bottom: 1px solid #555;
+}
+
+[data-bs-theme="dark"] .leaflet-bar a:hover {
+    background-color: #444;
+}
+
+[data-bs-theme="dark"] .leaflet-container {
+    background-color: #252525;
+}
+
+[data-bs-theme="dark"] .leaflet-tooltip {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+[data-bs-theme="dark"] .leaflet-popup-content-wrapper {
+    background-color: #333;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .leaflet-popup-tip {
+    background-color: #333;
+}

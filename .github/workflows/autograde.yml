@@ -1,0 +1,53 @@
+name: Autograde
+
+on: [push]
+
+jobs:
+  auto-grade-tutorial:
+    runs-on: ubuntu-latest
+    container:
+      image: abhilashiit/oe5005:1.0
+      options: --user root
+
+    steps:
+    - name: Checkout reference repository
+      uses: actions/checkout@v3
+      with:
+        repository: mavlab-courses/oe5005-test-tutorial
+        token: ${{ secrets.PAT_TOKEN }}
+        path: ref_repo
+        ref: 'main'
+
+    - name: Checkout student repository
+      uses: actions/checkout@v3
+      with:
+        path: student_repo
+        token: ${{ secrets.PAT_TOKEN }}
+        ref: ${{ github.ref }}
+
+    - name: Run tests
+      run: |
+        rm -rf ref_repo/ros2_ws/src/student/*
+        cp -rf student_repo/ros2_ws/src/student/* ref_repo/ros2_ws/src/student/
+        mkdir -p /workspaces/mavlab
+        cp -rf ref_repo/* /workspaces/mavlab/
+        
+        # Set permissions for mavlab
+        chown -R mavlab:mavlab /workspaces/mavlab
+        
+        # Run pytest as mavlab user
+        cd /workspaces/mavlab
+
+        # Copy files from ref to student
+        cp -rf /workspaces/mavlab/ros2_ws/src/ref/tut_03/input.yml /workspaces/mavlab/ros2_ws/src/student/tut_03/input.yml
+        cp -rf /workspaces/mavlab/ros2_ws/src/ref/tut_03/hyd.yml /workspaces/mavlab/ros2_ws/src/student/tut_03/hyd.yml
+
+        # Run pytest as mavlab user
+        cd /workspaces/mavlab/ros2_ws/src/ref && touch COLCON_IGNORE
+        cd /workspaces/mavlab/ros2_ws && rm -rf build install log
+        runuser -l mavlab -c "cd /workspaces/mavlab/ros2_ws && \
+          source /opt/ros/humble/setup.bash && \
+          colcon build && \
+          source install/setup.bash && \
+          cd /workspaces/mavlab && \
+          python3 -m pytest --tb=short ros2_ws/src/tests/"

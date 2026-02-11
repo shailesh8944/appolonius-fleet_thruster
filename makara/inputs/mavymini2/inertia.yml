@@ -1,0 +1,4 @@
+mass: 1 # in kg
+buoyancy_mass: 1 # in kg
+inertia_matrix: None # in kg*m^2
+added_mass_matrix: None # in kg*m^2/s

@@ -1,0 +1,22 @@
+naca_number: &naca None
+naca_file: &naca_file None
+delta_max: &dmax 35.0
+deltad_max: &ddmax 1.0
+area: &area 0.1 
+
+
+control_surfaces:
+  - 
+    control_surface_type: Rudder
+    control_surface_id: 1
+    control_surface_location: [0.0, 0.0, 0.0]    # With respect to BODY frame
+    control_surface_orientation: [0.0, 0.0, 0.0]  # With respect to BODY frame
+    control_surface_area: *area
+    control_surface_NACA: *naca
+    control_surface_T: 0.1
+    control_surface_delta_max: *dmax
+    control_surface_deltad_max: *ddmax
+    control_surface_hydrodynamics:
+      Y_delta: 0.02100751285923063
+      N_delta: -0.006813248905845932
+      X_delta: 0.0

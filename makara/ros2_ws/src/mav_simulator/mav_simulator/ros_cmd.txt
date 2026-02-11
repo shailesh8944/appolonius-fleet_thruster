@@ -1,0 +1,21 @@
+# Ros command for actuator/thrusters
+ros2 topic pub /mavymini_00/actuator_cmd interfaces/msg/Actuator "{
+  header: {
+    stamp: {sec: 0, nanosec: 0},
+    frame_id: 'vessel_frame'
+  },
+  actuator_values: [10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 1000],
+  actuator_names: ['cs_1', 'cs_2', 'cs_3', 'cs_4','cs_5','cs_6','th_1'],
+  covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+}"
+
+# Ros command for actuator/thrusters
+ros2 topic pub /sookshma_00/actuator_cmd interfaces/msg/Actuator "{
+  header: {
+    stamp: {sec: 0, nanosec: 0},
+    frame_id: 'vessel_frame'
+  },
+  actuator_values: [10.0],
+  actuator_names: ['cs_1'],
+  covariance: [0.0]
+}"

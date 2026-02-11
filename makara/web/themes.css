@@ -1,0 +1,725 @@
+/**
+ * Marine Vessel CAD Configurator - Theming System
+ * 
+ * This stylesheet implements a comprehensive theming system for the Marine Vessel CAD Configurator.
+ * It provides complete light and dark mode themes using CSS variables and the data-bs-theme attribute.
+ * 
+ * Features:
+ * - Complete light and dark mode color schemes
+ * - Consistent color variables for all UI components
+ * - Theme-specific adjustments for contrast and readability
+ * - Support for Bootstrap components with theme integration
+ * - Custom styling for specialized components (3D viewport, code editors, etc.)
+ * 
+ * The theme system is designed to be easily extensible with additional themes
+ * and provides smooth transitions between themes.
+ */
+
+/* ====== BASE THEME SYSTEM ====== */
+:root {
+    /* Primary theme colors - Light Mode */
+    --primary-color: #0078d4;
+    --primary-hover: #0056b3;
+    --primary-active: #004494;
+    --primary-light: #e6f2ff;
+    --primary-contrast: #ffffff;
+    
+    /* Secondary colors */
+    --secondary-color: #6c757d;
+    --secondary-hover: #5a6268;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    
+    /* Light theme specific */
+    --bg-color: #f8f9fa;
+    --text-color: #212529;
+    --text-muted-color: #6c757d;
+    --link-color: #0078d4;
+    --sidebar-bg: #f0f0f0;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --hover-bg: #e9ecef;
+    --active-bg: #e2e6ea;
+    --modal-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-text: #212529;
+    --input-border: #ced4da;
+    --input-focus-border: #80bdff;
+    --alert-info-bg: #cff4fc;
+    --alert-info-text: #055160;
+    --alert-success-bg: #d1e7dd;
+    --alert-success-text: #0f5132;
+    --alert-warning-bg: #fff3cd;
+    --alert-warning-text: #664d03;
+    --alert-danger-bg: #f8d7da;
+    --alert-danger-text: #842029;
+    --code-bg: #f8f9fa;
+    --tooltip-bg: #000000;
+    --tooltip-text: #ffffff;
+    
+    /* Background colors */
+    --body-bg: #f8f9fa;
+    --toolbar-bg: #ffffff;
+    --panel-bg: #ffffff;
+    --panel-header-bg: #f8f9fa;
+    
+    /* Text colors */
+    --text-muted: #6c757d;
+    --text-light: #adb5bd;
+    --label-color: #495057;
+    
+    /* UI element colors */
+    --btn-bg: #f8f9fa;
+    --btn-hover-bg: #e9ecef;
+    --accent-color: #007bff;
+    --badge-bg: #e9ecef;
+    
+    /* Scrollbar colors */
+    --scrollbar-track: #f1f1f1;
+    --scrollbar-thumb: #c1c1c1;
+    
+    /* Viewport colors */
+    --grid-color: #cccccc;
+    --grid-axis-x: #ff5555;  /* Red for X axis */
+    --grid-axis-y: #55ff55;  /* Green for Y axis */
+    --grid-axis-z: #5555ff;  /* Blue for Z axis */
+    
+    /* Other UI elements */
+    --border-radius: 4px;
+    --sidebar-width: 320px;
+    --toolbar-height: 50px;
+    --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    
+    /* Syntax highlighting */
+    --code-comment: #6c757d;
+    --code-keyword: #007bff;
+    --code-string: #28a745;
+    --code-number: #fd7e14;
+}
+
+/* Dark theme variables */
+[data-bs-theme="dark"] {
+    /* Primary theme colors - Dark Mode */
+    --primary-color: #0d6efd;
+    --primary-hover: #0b5ed7;
+    --primary-active: #0a58ca;
+    --primary-light: #1a3257;
+    --primary-contrast: #ffffff;
+    
+    /* Base colors */
+    --bg-color: #121212;
+    --text-color: #f8f9fa;
+    --text-muted-color: #adb5bd;
+    --link-color: #50a1ff;
+    --sidebar-bg: #1e1e1e;
+    --card-bg: #2d2d2d;
+    --border-color: #444444;
+    --hover-bg: #383838;
+    --active-bg: #454545;
+    --modal-bg: #2d2d2d;
+    --input-bg: #333333;
+    --input-text: #f8f9fa;
+    --input-border: #555555;
+    --input-focus-border: #0d6efd;
+    
+    /* Alert colors - improved for dark mode */
+    --alert-info-bg: #0c2d3d;
+    --alert-info-text: #9eeaf9;
+    --alert-success-bg: #0d321e;
+    --alert-success-text: #a3cfbb;
+    --alert-warning-bg: #332701;
+    --alert-warning-text: #ffe69c;
+    --alert-danger-bg: #2c0b0e;
+    --alert-danger-text: #ea868f;
+    
+    /* Code highlighting */
+    --code-bg: #1a1a1a;
+    --tooltip-bg: #495057;
+    --tooltip-text: #f8f9fa;
+    
+    /* Shadows for dark mode */
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+    --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+    
+    /* Background colors */
+    --body-bg: #212529;
+    --toolbar-bg: #343a40;
+    --panel-bg: #343a40;
+    --panel-header-bg: #2d3339;
+    
+    /* Text colors */
+    --text-muted: #adb5bd;
+    --text-light: #6c757d;
+    --label-color: #e9ecef;
+    
+    /* UI element colors */
+    --btn-bg: #2d3339;
+    --btn-hover-bg: #495057;
+    --accent-color: #0d6efd;
+    --badge-bg: #495057;
+    
+    /* Scrollbar colors */
+    --scrollbar-track: #2d3339;
+    --scrollbar-thumb: #495057;
+    
+    /* Viewport colors */
+    --grid-color: #495057;
+    --grid-axis-x: #ff7777;  /* Brighter red for X axis in dark mode */
+    --grid-axis-y: #77ff77;  /* Brighter green for Y axis in dark mode */
+    --grid-axis-z: #7777ff;  /* Brighter blue for Z axis in dark mode */
+    
+    /* Syntax highlighting */
+    --code-comment: #adb5bd;
+    --code-keyword: #0d6efd;
+    --code-string: #20c997;
+    --code-number: #fd7e14;
+}
+
+/* ====== CORE UI ELEMENTS ====== */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+    color: var(--link-color);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+/* ====== WORKSPACE COMPONENTS ====== */
+/* Toolbar */
+.toolbar {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.toolbar-btn {
+    color: var(--text-color);
+}
+
+.toolbar-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+.toolbar-divider {
+    background-color: var(--border-color);
+}
+
+/* Sidebar */
+.sidebar-content,
+.left-sidebar,
+.right-sidebar {
+    background-color: var(--sidebar-bg);
+    border-color: var(--border-color);
+}
+
+.sidebar-tab {
+    color: var(--text-muted-color);
+}
+
+.sidebar-tab.active {
+    color: var(--text-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.sidebar-tab:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Panels */
+.panel {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.panel-header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-body {
+    background-color: var(--card-bg);
+}
+
+/* ====== UI CONTROLS ====== */
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--primary-contrast);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-hover);
+    border-color: var(--secondary-hover);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--primary-contrast);
+}
+
+/* Forms and Inputs */
+.form-group label {
+    color: var(--text-color);
+}
+
+.input-group-text,
+.form-control,
+.form-select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-check-input {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.text-muted {
+    color: var(--text-muted-color) !important;
+}
+
+::placeholder {
+    color: var(--text-muted-color) !important;
+    opacity: 0.7 !important;
+}
+
+/* ====== COMPONENT SPECIFIC ====== */
+/* Cards and Modals */
+.card,
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.modal-header,
+.modal-footer {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+.btn-close {
+    filter: invert(var(--btn-close-invert));
+}
+
+[data-bs-theme="dark"] .btn-close {
+    --btn-close-invert: 1;
+}
+
+/* Alerts */
+.alert-info {
+    background-color: var(--alert-info-bg);
+    color: var(--alert-info-text);
+    border-color: var(--alert-info-bg);
+}
+
+.alert-success {
+    background-color: var(--alert-success-bg);
+    color: var(--alert-success-text);
+    border-color: var(--alert-success-bg);
+}
+
+.alert-warning {
+    background-color: var(--alert-warning-bg);
+    color: var(--alert-warning-text);
+    border-color: var(--alert-warning-bg);
+}
+
+.alert-danger {
+    background-color: var(--alert-danger-bg);
+    color: var(--alert-danger-text);
+    border-color: var(--alert-danger-bg);
+}
+
+/* Code and YAML Previews */
+pre,
+.yaml-preview,
+code {
+    background-color: var(--code-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.code-example {
+    background-color: var(--code-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+
+code {
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* Alert text in dark mode should be more visible */
+[data-bs-theme="dark"] .alert {
+    --alert-text-opacity: 1;
+}
+
+[data-bs-theme="dark"] .alert-info code,
+[data-bs-theme="dark"] .alert-success code,
+[data-bs-theme="dark"] .alert-warning code,
+[data-bs-theme="dark"] .alert-danger code {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation elements */
+.nav-tabs {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-color);
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    background-color: var(--hover-bg);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    border-color: var(--border-color) var(--border-color) var(--bg-color);
+}
+
+/* Bootstrap specific overrides */
+.dropdown-menu {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+.dropdown-item {
+    color: var(--text-color);
+}
+
+.dropdown-item:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-color);
+}
+
+/* Component buttons */
+.component-btn {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.component-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+/* 3D Viewport specific */
+.viewport {
+    background-color: #111111; /* Keep dark for 3D view regardless of theme */
+}
+
+.viewport-tools {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.viewport-btn {
+    color: var(--text-color);
+}
+
+.viewport-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+.viewport-btn.active {
+    background-color: var(--primary-color);
+    color: var(--primary-contrast);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 6px;
+    border: 2px solid var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted-color);
+}
+
+/* Notifications */
+.notification {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-left: 4px solid var(--primary-color);
+    box-shadow: var(--shadow);
+}
+
+.notification.success {
+    border-color: var(--success-color);
+}
+
+.notification.error {
+    border-color: var(--danger-color);
+}
+
+.notification.warning {
+    border-color: var(--warning-color);
+}
+
+.notification.info {
+    border-color: var(--info-color);
+}
+
+/* Matrix UI Elements - special handling */
+.input-group-text sub {
+    color: var(--text-color);
+}
+
+/* Context menu */
+.context-menu {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.context-menu-item {
+    color: var(--text-color);
+}
+
+.context-menu-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.context-menu-divider {
+    background-color: var(--border-color);
+}
+
+/* Transition effects for theme switching */
+.card,
+.panel,
+.modal-content,
+.form-control,
+.btn,
+.alert,
+pre,
+.notification,
+.nav-tabs,
+.dropdown-menu,
+.viewport-tools {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Theme Toggle Button Styling */
+.theme-toggle-btn {
+    position: relative;
+    width: 40px;
+    height: 32px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0;
+}
+
+.theme-toggle-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.theme-icon-light,
+.theme-icon-dark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Light mode setup */
+:root .theme-icon-light {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+:root .theme-icon-dark {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+}
+
+/* Dark mode setup */
+[data-bs-theme="dark"] .theme-icon-light {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+}
+
+[data-bs-theme="dark"] .theme-icon-dark {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Theme Toggle Button Hover */
+.theme-toggle-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+.theme-toggle-btn:active {
+    background-color: var(--active-bg);
+}
+
+/* Code syntax highlight effect for dark mode */
+[data-bs-theme="dark"] .code-example {
+    color: #e6e6e6;
+}
+
+/* Simulate syntax highlighting in dark mode */
+[data-bs-theme="dark"] .code-example .key,
+[data-bs-theme="dark"] .code-example .yaml-key {
+    color: #88c0d0;
+}
+
+[data-bs-theme="dark"] .code-example .string,
+[data-bs-theme="dark"] .code-example .yaml-string {
+    color: #a3be8c;
+}
+
+[data-bs-theme="dark"] .code-example .number,
+[data-bs-theme="dark"] .code-example .yaml-number {
+    color: #b48ead;
+}
+
+[data-bs-theme="dark"] .code-example .comment,
+[data-bs-theme="dark"] .code-example .yaml-comment {
+    color: #7f848e;
+    font-style: italic;
+}
+
+/* Improve alert visibility in dark mode */
+[data-bs-theme="dark"] .alert.alert-info {
+    border-left: 4px solid var(--alert-info-text);
+}
+
+[data-bs-theme="dark"] .alert.alert-success {
+    border-left: 4px solid var(--alert-success-text);
+}
+
+[data-bs-theme="dark"] .alert.alert-warning {
+    border-left: 4px solid var(--alert-warning-text);
+}
+
+[data-bs-theme="dark"] .alert.alert-danger {
+    border-left: 4px solid var(--alert-danger-text);
+}
+
+/* YAML Preview specific styling */
+.yaml-preview {
+    padding: 15px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    border-radius: 4px;
+}
+
+/* Improve tab styles for dark mode */
+[data-bs-theme="dark"] .nav-tabs {
+    border-bottom-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link.active {
+    background-color: var(--card-bg);
+    color: var(--primary-color);
+    border-color: var(--border-color) var(--border-color) var(--card-bg);
+    font-weight: 500;
+}
+
+[data-bs-theme="dark"] .tab-content {
+    background-color: var(--card-bg);
+    border-radius: 0 0 4px 4px;
+    padding-top: 15px;
+}
+
+/* Improve YAML preview scrollbars */
+.yaml-preview::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.yaml-preview::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.yaml-preview::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+
+.yaml-preview::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted-color);
+} 

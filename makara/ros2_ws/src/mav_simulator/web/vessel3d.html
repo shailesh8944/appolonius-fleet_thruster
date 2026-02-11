@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Vessel Visualization</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/roslibjs/1.1.0/roslib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      pointer-events: none;
+    }
+    
+    #connectionStatus {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    .status-connected {
+      background-color: #4CAF50;
+      box-shadow: 0 0 5px #4CAF50;
+      animation: pulse 2s infinite;
+    }
+    
+    .status-disconnected {
+      background-color: #f44336;
+      box-shadow: 0 0 5px #f44336;
+    }
+    
+    .status-stale {
+      background-color: #FF9800;
+      box-shadow: 0 0 5px #FF9800;
+    }
+    
+    .fullscreen-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 8px 12px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .fullscreen-button:hover {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+      70% { box-shadow: 0 0 0 5px rgba(76, 175, 80, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
+    
+    .control-buttons {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .control-button {
+      padding: 8px 12px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .control-button:hover {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    #sizeControl {
+      margin-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      padding-top: 10px;
+      pointer-events: auto; /* Allow interaction with size controls */
+    }
+
+    #vesselSelector3d {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      pointer-events: auto;
+    }
+
+    .vessel-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .vessel-toggle input {
+      cursor: pointer;
+    }
+
+    .color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    #vesselData {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      pointer-events: auto;
+    }
+
+    .vessel-card {
+      background-color: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    .vessel-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .vessel-card-body {
+      line-height: 1.4;
+    }
+
+    .status-chip {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-chip.connected {
+      background-color: rgba(76, 175, 80, 0.2);
+      color: #8bc34a;
+    }
+
+    .status-chip.stale {
+      background-color: rgba(255, 152, 0, 0.2);
+      color: #ffb74d;
+    }
+
+    .status-chip.disconnected {
+      background-color: rgba(244, 67, 54, 0.2);
+      color: #ef9a9a;
+    }
+
+    .status-chip.connecting {
+      background-color: rgba(33, 150, 243, 0.2);
+      color: #64b5f6;
+    }
+    
+    #vesselDimensions {
+      margin-top: 15px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      pointer-events: auto; /* Allow interaction with dimension inputs */
+    }
+    
+    #vesselDimensions label {
+      font-size: 12px;
+    }
+    
+    #vesselDimensions input {
+      width: 100%;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    
+    .dimension-control {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #applyDimensions {
+      grid-column: span 2;
+      margin-top: 5px;
+      padding: 4px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    
+    #applyDimensions:hover {
+      background-color: #0b7dda;
+    }
+    
+    #vesselSizeSlider {
+      width: 100%;
+      margin-top: 8px;
+      accent-color: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <span id="connectionStatus" class="status-disconnected"></span>
+    <span id="connectionText">Disconnected</span>
+    <div id="vesselSelector3d">
+      <strong style="font-size:13px; letter-spacing:0.5px; text-transform:uppercase;">Active Vessels</strong>
+      <div id="vesselList3d"></div>
+    </div>
+    <div id="vesselData"></div>
+    <div id="sizeControl">
+      <label for="vesselSizeSlider">Vessel Size: <span id="sizeValue">1.0</span>x</label>
+      <input type="range" id="vesselSizeSlider" min="0.1" max="2" step="0.1" value="1.0">
+      <button id="applySize" style="margin-top:5px; width:100%; padding:3px; cursor:pointer;">Apply Size</button>
+    </div>
+    <div id="vesselDimensions">
+      <div class="dimension-control">
+        <label for="vesselLength">Length (X-axis):</label>
+        <input type="number" id="vesselLength" min="1" max="100" value="2">
+      </div>
+      <div class="dimension-control">
+        <label for="vesselWidth">Width (Y-axis):</label>
+        <input type="number" id="vesselWidth" min="1" max="100" value="1">
+      </div>
+      <div class="dimension-control">
+        <label for="vesselHeight">Height (Z-axis):</label>
+        <input type="number" id="vesselHeight" min="1" max="100" value="0.5">
+      </div>
+      <button id="applyDimensions">Apply Dimensions</button>
+    </div>
+  </div>
+  
+  <div class="control-buttons">
+    <button id="fullscreenBtn" class="control-button">Fullscreen</button>
+    <button id="resetCameraBtn" class="control-button">Reset Camera</button>
+  </div>
+  
+  <script>
+    let scene, camera, renderer, controls;
+    const defaultVessels = ['evader_03', 'sookshma2_01', 'sookshma3_02', 'sookshma_00'];
+    const vesselPalette = ['#2196F3', '#FF4081', '#4CAF50', '#FFB300', '#9C27B0', '#00BCD4'];
+    const vesselColors = new Map();
+    const vessels = new Map();
+    const odomTypes = ['nav_msgs/Odometry', 'nav_msgs/msg/Odometry'];
+    const MAX_PATH_POINTS = 1500;
+
+    const initialVesselSize = {
+      width: 1,
+      height: 0.5,
+      length: 2
+    };
+    let vesselScaleFactor = 1.0;
+
+    let ros;
+    let isConnected = false;
+    let lastMessageTime = 0;
+    let autoSelected = false;
+
+    const infoContainer = document.getElementById('vesselData');
+    const vesselListContainer = document.getElementById('vesselList3d');
+    let infoPlaceholder;
+
+    function showInfoPlaceholder() {
+      if (!infoContainer) return;
+      if (!infoPlaceholder) {
+        infoPlaceholder = document.createElement('div');
+        infoPlaceholder.className = 'vessel-card';
+        infoPlaceholder.style.opacity = '0.8';
+        infoPlaceholder.textContent = 'Activate vessels to view telemetry.';
+      }
+      if (!infoPlaceholder.parentNode) {
+        infoContainer.appendChild(infoPlaceholder);
+      }
+    }
+
+    function hideInfoPlaceholder() {
+      if (infoPlaceholder && infoPlaceholder.parentNode) {
+        infoPlaceholder.remove();
+      }
+    }
+
+    function initScene() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87CEEB);
+
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(50, 50, 50);
+      camera.lookAt(0, 0, 0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.25;
+
+      const axesHelper = new THREE.AxesHelper(50);
+      scene.add(axesHelper);
+
+      const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(1, 1, 1).normalize();
+      scene.add(directionalLight);
+
+      window.addEventListener('resize', onWindowResize);
+      document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+      document.getElementById('resetCameraBtn').addEventListener('click', () => resetCamera());
+
+      setupSizeControls();
+      showInfoPlaceholder();
+      animate();
+    }
+
+    function setupSizeControls() {
+      const sizeSlider = document.getElementById('vesselSizeSlider');
+      const sizeValue = document.getElementById('sizeValue');
+      const applyButton = document.getElementById('applySize');
+
+      sizeSlider.addEventListener('input', (e) => {
+        sizeValue.textContent = parseFloat(e.target.value).toFixed(1);
+      });
+
+      applyButton.addEventListener('click', () => {
+        vesselScaleFactor = parseFloat(sizeSlider.value) || 1.0;
+        updateVesselSize();
+      });
+
+      const lengthInput = document.getElementById('vesselLength');
+      const widthInput = document.getElementById('vesselWidth');
+      const heightInput = document.getElementById('vesselHeight');
+      const applyDimensionsButton = document.getElementById('applyDimensions');
+
+      lengthInput.value = initialVesselSize.length;
+      widthInput.value = initialVesselSize.width;
+      heightInput.value = initialVesselSize.height;
+
+      applyDimensionsButton.addEventListener('click', () => {
+        initialVesselSize.length = parseFloat(lengthInput.value) || initialVesselSize.length;
+        initialVesselSize.width = parseFloat(widthInput.value) || initialVesselSize.width;
+        initialVesselSize.height = parseFloat(heightInput.value) || initialVesselSize.height;
+        vesselScaleFactor = 1.0;
+        sizeSlider.value = vesselScaleFactor;
+        sizeValue.textContent = vesselScaleFactor.toFixed(1);
+        updateVesselSize();
+      });
+    }
+
+    function getScaledSize() {
+      return {
+        width: initialVesselSize.width * vesselScaleFactor,
+        height: initialVesselSize.height * vesselScaleFactor,
+        length: initialVesselSize.length * vesselScaleFactor
+      };
+    }
+
+    function createVesselAxes() {
+      const origin = new THREE.Vector3(0, 0, 0);
+      const xAxisLength = 15 * vesselScaleFactor;
+      const yAxisLength = 10 * vesselScaleFactor;
+      const zAxisLength = 7 * vesselScaleFactor;
+
+      const xAxis = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), origin, xAxisLength, 0xFF0000, xAxisLength * 0.2, xAxisLength * 0.1);
+      const yAxis = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), origin, yAxisLength, 0x00FF00, yAxisLength * 0.2, yAxisLength * 0.1);
+      const zAxis = new THREE.ArrowHelper(new THREE.Vector3(0, -1, 0), origin, zAxisLength, 0x0000FF, zAxisLength * 0.2, zAxisLength * 0.1);
+
+      const createLabel = (text, position, color) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 32;
+        const context = canvas.getContext('2d');
+        context.fillStyle = color;
+        context.font = '24px Arial';
+        context.fillText(text, 4, 24);
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ map: texture });
+        const sprite = new THREE.Sprite(material);
+        sprite.position.copy(position);
+        sprite.scale.set(5 * vesselScaleFactor, 2.5 * vesselScaleFactor, 1);
+        return sprite;
+      };
+
+      const axesGroup = new THREE.Group();
+      axesGroup.add(xAxis);
+      axesGroup.add(yAxis);
+      axesGroup.add(zAxis);
+      axesGroup.add(createLabel('X', new THREE.Vector3(xAxisLength + 2, 0, 0), '#ff0000'));
+      axesGroup.add(createLabel('Y', new THREE.Vector3(0, 0, yAxisLength + 2), '#00ff00'));
+      axesGroup.add(createLabel('Z', new THREE.Vector3(0, -(zAxisLength + 2), 0), '#0000ff'));
+      return axesGroup;
+    }
+
+    function lightenColor(color, amount = 0.2) {
+      const col = new THREE.Color(color);
+      const hsl = {};
+      col.getHSL(hsl);
+      hsl.l = Math.min(1, hsl.l + amount);
+      const lighter = new THREE.Color();
+      lighter.setHSL(hsl.h, hsl.s, hsl.l);
+      return lighter;
+    }
+
+    function createHullGeometry(length, width, height) {
+      const halfWidth = width / 2;
+      const bow = length * 0.45;
+      const stern = -length * 0.45;
+      const flare = halfWidth * 1.1;
+
+      const shape = new THREE.Shape();
+      shape.moveTo(stern, -halfWidth * 0.6);
+      shape.quadraticCurveTo(length * 0.05, -flare, bow, 0);
+      shape.quadraticCurveTo(length * 0.05, flare, stern, halfWidth * 0.6);
+      shape.lineTo(stern - length * 0.08, halfWidth * 0.3);
+      shape.lineTo(stern - length * 0.08, -halfWidth * 0.3);
+      shape.closePath();
+
+      const extrudeSettings = {
+        depth: height,
+        bevelEnabled: false,
+        curveSegments: 24,
+        steps: 1
+      };
+
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      geometry.rotateX(-Math.PI / 2);
+      geometry.translate(0, height / 2, 0);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function createDeckGeometry(length, width, height, offsetY) {
+      const halfWidth = width / 2;
+      const bow = length * 0.4;
+      const stern = -length * 0.35;
+      const shape = new THREE.Shape();
+      shape.moveTo(stern, -halfWidth * 0.7);
+      shape.quadraticCurveTo(length * 0.02, -halfWidth, bow, 0);
+      shape.quadraticCurveTo(length * 0.02, halfWidth, stern, halfWidth * 0.7);
+      shape.closePath();
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth: height,
+        bevelEnabled: false,
+        curveSegments: 20,
+        steps: 1
+      });
+      geometry.rotateX(-Math.PI / 2);
+      geometry.translate(0, offsetY + height / 2, 0);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function createVesselMesh(color) {
+      const size = getScaledSize();
+      const group = new THREE.Group();
+
+      const hullMaterial = new THREE.MeshPhongMaterial({
+        color,
+        specular: 0x202020,
+        shininess: 60,
+        flatShading: true
+      });
+
+      const deckMaterial = new THREE.MeshPhongMaterial({
+        color: lightenColor(color, 0.25),
+        specular: 0x303030,
+        shininess: 80
+      });
+
+      const trimMaterial = new THREE.MeshPhongMaterial({
+        color: lightenColor(color, 0.4),
+        specular: 0x404040,
+        shininess: 90
+      });
+
+      const hullGeometry = createHullGeometry(size.length, size.width, size.height * 0.5);
+      const hullMesh = new THREE.Mesh(hullGeometry, hullMaterial);
+      group.add(hullMesh);
+
+      const keelGeometry = new THREE.BoxGeometry(size.length * 0.4, size.height * 0.08, size.width * 0.08);
+      keelGeometry.translate(-size.length * 0.05, size.height * 0.04, 0);
+      const keelMesh = new THREE.Mesh(keelGeometry, trimMaterial);
+      group.add(keelMesh);
+
+      const deckGeometry = createDeckGeometry(size.length * 0.85, size.width * 0.85, size.height * 0.2, size.height * 0.45);
+      const deckMesh = new THREE.Mesh(deckGeometry, deckMaterial);
+      group.add(deckMesh);
+
+      const bridgeGeometry = new THREE.BoxGeometry(size.length * 0.25, size.height * 0.35, size.width * 0.45);
+      bridgeGeometry.translate(-size.length * 0.1, size.height * 0.78, 0);
+      const bridgeMesh = new THREE.Mesh(bridgeGeometry, deckMaterial);
+      group.add(bridgeMesh);
+
+      const bridgeTopGeometry = new THREE.BoxGeometry(size.length * 0.18, size.height * 0.18, size.width * 0.35);
+      bridgeTopGeometry.translate(-size.length * 0.1, size.height * 0.98, 0);
+      const bridgeTopMesh = new THREE.Mesh(bridgeTopGeometry, trimMaterial);
+      group.add(bridgeTopMesh);
+
+      const mastGeometry = new THREE.CylinderGeometry(size.width * 0.025, size.width * 0.025, size.height * 0.8, 10);
+      mastGeometry.translate(size.length * 0.12, size.height * 0.9, 0);
+      const mastMesh = new THREE.Mesh(mastGeometry, trimMaterial);
+      group.add(mastMesh);
+
+      const radarGeometry = new THREE.BoxGeometry(size.length * 0.12, size.height * 0.05, size.width * 0.05);
+      radarGeometry.translate(size.length * 0.12, size.height * 1.1, 0);
+      const radarMesh = new THREE.Mesh(radarGeometry, trimMaterial);
+      group.add(radarMesh);
+
+      const bowRailGeometry = new THREE.TorusGeometry(size.width * 0.45, size.height * 0.02, 8, 44, Math.PI);
+      bowRailGeometry.rotateZ(Math.PI / 2);
+      bowRailGeometry.rotateX(Math.PI / 2);
+      bowRailGeometry.translate(size.length * 0.25, size.height * 0.7, 0);
+      const bowRailMesh = new THREE.Mesh(bowRailGeometry, trimMaterial);
+      group.add(bowRailMesh);
+
+      group.add(createVesselAxes());
+      return group;
+    }
+
+    function ensureVesselColor(name) {
+      if (vesselColors.has(name)) return vesselColors.get(name);
+      const used = new Set(vesselColors.values());
+      let color = vesselPalette.find(c => !used.has(c));
+      if (!color) {
+        color = vesselPalette[used.size % vesselPalette.length];
+      }
+      vesselColors.set(name, color);
+      return color;
+    }
+
+    function createInfoCard(name, color) {
+      if (!infoContainer) return null;
+      hideInfoPlaceholder();
+      const card = document.createElement('div');
+      card.className = 'vessel-card';
+      card.dataset.vessel = name;
+      card.innerHTML = `
+        <div class="vessel-card-header">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="color-dot" style="background:${color}"></span>
+            <strong>${name}</strong>
+          </div>
+          <span class="status-chip connecting" data-role="status">Connecting</span>
+        </div>
+        <div class="vessel-card-body">
+          <div>Position: <span data-role="position">0.00, 0.00, 0.00</span></div>
+          <div>Orientation: <span data-role="orientation">0.0°, 0.0°, 0.0°</span></div>
+        </div>`;
+      infoContainer.appendChild(card);
+      return {
+        root: card,
+        statusEl: card.querySelector('[data-role="status"]'),
+        positionEl: card.querySelector('[data-role="position"]'),
+        orientationEl: card.querySelector('[data-role="orientation"]')
+      };
+    }
+
+    function addVessel(vesselName) {
+      const color = ensureVesselColor(vesselName);
+      const mesh = createVesselMesh(color);
+      scene.add(mesh);
+
+      const pathMaterial = new THREE.LineBasicMaterial({ color, linewidth: 2 });
+      const pathLine = new THREE.Line(new THREE.BufferGeometry(), pathMaterial);
+      scene.add(pathLine);
+
+      const infoElements = createInfoCard(vesselName, color);
+      const vessel = {
+        name: vesselName,
+        color,
+        mesh,
+        pathLine,
+        pathPoints: [],
+        infoElements,
+        topic: null,
+        lastMessageTime: 0,
+        status: 'connecting'
+      };
+      vessels.set(vesselName, vessel);
+      updateVesselStatus(vessel, 'connecting');
+      subscribeToVessel(vesselName);
+      return vessel;
+    }
+
+    function removeVessel(vesselName) {
+      const vessel = vessels.get(vesselName);
+      if (!vessel) return;
+
+      if (vessel.topic) {
+        vessel.topic.unsubscribe();
+        vessel.topic = null;
+      }
+
+      if (vessel.mesh) {
+        scene.remove(vessel.mesh);
+      }
+
+      if (vessel.pathLine) {
+        vessel.pathLine.geometry.dispose();
+        scene.remove(vessel.pathLine);
+      }
+
+      if (vessel.infoElements && vessel.infoElements.root) {
+        vessel.infoElements.root.remove();
+      }
+
+      vessels.delete(vesselName);
+      if (vessels.size === 0) {
+        showInfoPlaceholder();
+      }
+    }
+
+    function updateVesselSize() {
+      vessels.forEach(vessel => rebuildVesselMesh(vessel));
+    }
+
+    function rebuildVesselMesh(vessel) {
+      if (!vessel || !vessel.mesh) return;
+      const position = vessel.mesh.position.clone();
+      const quaternion = vessel.mesh.quaternion.clone();
+      scene.remove(vessel.mesh);
+      const newMesh = createVesselMesh(vessel.color);
+      newMesh.position.copy(position);
+      newMesh.quaternion.copy(quaternion);
+      vessel.mesh = newMesh;
+      scene.add(newMesh);
+    }
+
+    function toggleVesselSelection(vesselName, enable) {
+      if (enable) {
+        if (!vessels.has(vesselName)) {
+          addVessel(vesselName);
+        }
+      } else {
+        removeVessel(vesselName);
+      }
+    }
+
+    function updateVesselListUI(vesselNames) {
+      if (!vesselListContainer) return;
+      vesselListContainer.innerHTML = '';
+
+      if (!vesselNames || vesselNames.length === 0) {
+        vesselListContainer.textContent = 'No vessels detected';
+        return;
+      }
+
+      const checkboxMap = new Map();
+      vesselNames.forEach(name => {
+        ensureVesselColor(name);
+        const label = document.createElement('label');
+        label.className = 'vessel-toggle';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = name;
+        checkbox.checked = vessels.has(name);
+        checkbox.addEventListener('change', (e) => {
+          toggleVesselSelection(name, e.target.checked);
+        });
+
+        const dot = document.createElement('span');
+        dot.className = 'color-dot';
+        dot.style.backgroundColor = vesselColors.get(name);
+
+        const text = document.createElement('span');
+        text.textContent = name;
+
+        label.appendChild(checkbox);
+        label.appendChild(dot);
+        label.appendChild(text);
+        vesselListContainer.appendChild(label);
+        checkboxMap.set(name, checkbox);
+      });
+
+      if (!autoSelected) {
+        defaultVessels.forEach(name => {
+          const checkbox = checkboxMap.get(name);
+          if (checkbox && !checkbox.checked) {
+            checkbox.checked = true;
+            toggleVesselSelection(name, true);
+          }
+        });
+        autoSelected = true;
+      }
+    }
+
+    function subscribeToVessel(vesselName, index = 0) {
+      if (!ros) return;
+      if (index >= odomTypes.length) {
+        console.error(`Failed to subscribe to ${vesselName}`);
+        return;
+      }
+
+      try {
+        const topic = new ROSLIB.Topic({
+          ros,
+          name: `/${vesselName}/odometry_sim`,
+          messageType: odomTypes[index]
+        });
+
+        topic.subscribe(message => handleOdometry(vesselName, message));
+        const vessel = vessels.get(vesselName);
+        if (vessel) {
+          vessel.topic = topic;
+        }
+        console.log(`Subscribed to ${vesselName} with type ${odomTypes[index]}`);
+      } catch (error) {
+        console.warn(`Failed to subscribe to ${vesselName} using ${odomTypes[index]}`, error);
+        subscribeToVessel(vesselName, index + 1);
+      }
+    }
+
+    function handleOdometry(vesselName, message) {
+      const vessel = vessels.get(vesselName);
+      if (!vessel) return;
+
+      lastMessageTime = Date.now();
+      vessel.lastMessageTime = lastMessageTime;
+
+      const x = message.pose.pose.position.x;
+      const y = message.pose.pose.position.y;
+      const z = message.pose.pose.position.z;
+
+      const qx = message.pose.pose.orientation.x;
+      const qy = message.pose.pose.orientation.y;
+      const qz = message.pose.pose.orientation.z;
+      const qw = message.pose.pose.orientation.w;
+
+      vessel.mesh.position.set(x, z, y);
+
+      const modifiedQx = qx;
+      const modifiedQy = qy;
+      const modifiedQz = -qz;
+      const modifiedQw = qw;
+      vessel.mesh.quaternion.set(modifiedQx, modifiedQz, modifiedQy, modifiedQw);
+
+      const euler = quaternionToEuler({ x: qx, y: qy, z: qz, w: qw });
+      updateInfoCard(vessel, { x, y, z }, euler);
+      updateVesselStatus(vessel, 'connected');
+      updatePath(vessel, x, z, y);
+
+      document.getElementById('connectionStatus').className = 'status-connected';
+      document.getElementById('connectionText').textContent = 'Connected';
+
+      if (vessel.pathPoints.length === 1) {
+        resetCamera(vesselName);
+      }
+    }
+
+    function updateInfoCard(vessel, position, orientation) {
+      if (!vessel.infoElements) return;
+      vessel.infoElements.positionEl.textContent = `${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`;
+      vessel.infoElements.orientationEl.textContent = `${orientation.roll.toFixed(1)}°, ${orientation.pitch.toFixed(1)}°, ${orientation.yaw.toFixed(1)}°`;
+    }
+
+    function updateVesselStatus(vessel, status) {
+      if (!vessel || !vessel.infoElements) return;
+      vessel.status = status;
+      const statusEl = vessel.infoElements.statusEl;
+      if (!statusEl) return;
+      statusEl.className = `status-chip ${status}`;
+      const labels = {
+        connected: 'Connected',
+        stale: 'Stale',
+        disconnected: 'Disconnected',
+        connecting: 'Connecting'
+      };
+      statusEl.textContent = labels[status] || status;
+    }
+
+    function updatePath(vessel, x, y, z) {
+      vessel.pathPoints.push(new THREE.Vector3(x, y, z));
+      if (vessel.pathPoints.length > MAX_PATH_POINTS) {
+        vessel.pathPoints.shift();
+      }
+      vessel.pathLine.geometry.dispose();
+      vessel.pathLine.geometry = new THREE.BufferGeometry().setFromPoints(vessel.pathPoints);
+    }
+
+    function resetCamera(targetName) {
+      let vessel = targetName ? vessels.get(targetName) : null;
+      if (!vessel) {
+        vessel = vessels.values().next().value;
+      }
+      if (!vessel) return;
+      const vesselPosition = vessel.mesh.position.clone();
+      const offset = new THREE.Vector3(30, 30, 30);
+      camera.position.copy(vesselPosition).add(offset);
+      controls.target.copy(vesselPosition);
+      controls.update();
+    }
+    
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+      checkConnectionStatus();
+    }
+
+    function connectToROS() {
+      ros = new ROSLIB.Ros({ url: 'ws://localhost:9090' });
+
+      ros.on('connection', () => {
+        console.log('Connected to rosbridge');
+        document.getElementById('connectionStatus').className = 'status-connected';
+        document.getElementById('connectionText').textContent = 'Connected';
+        isConnected = true;
+        setTimeout(discoverVessels, 1000);
+      });
+
+      ros.on('error', (error) => {
+        console.error('Error connecting to rosbridge:', error);
+        document.getElementById('connectionStatus').className = 'status-disconnected';
+        document.getElementById('connectionText').textContent = 'Connection Error';
+        isConnected = false;
+      });
+
+      ros.on('close', () => {
+        console.log('Connection to rosbridge closed');
+        document.getElementById('connectionStatus').className = 'status-disconnected';
+        document.getElementById('connectionText').textContent = 'Disconnected';
+        isConnected = false;
+        vessels.forEach(vessel => updateVesselStatus(vessel, 'disconnected'));
+        setTimeout(connectToROS, 3000);
+      });
+    }
+
+    function discoverVessels() {
+      if (!ros) return;
+      try {
+        if (typeof ros.getTopicsAndTypes === 'function') {
+          ros.getTopicsAndTypes(processTopics);
+        } else if (typeof ros.getTopics === 'function') {
+          ros.getTopics(processTopicsLegacy);
+        } else {
+          console.warn('No topic discovery methods available, using fallback list');
+          useFallbackVessels();
+        }
+      } catch (error) {
+        console.error('Error discovering vessels:', error);
+        useFallbackVessels();
+      }
+    }
+
+    function processTopics(result) {
+      if (!result || !Array.isArray(result.topics)) {
+        console.error('Invalid topic result format:', result);
+        useFallbackVessels();
+        return;
+      }
+      const vesselNames = Array.from(new Set(result.topics
+        .filter(topic => topic.name.endsWith('/odometry_sim'))
+        .map(topic => {
+          const parts = topic.name.split('/');
+          return parts.length >= 2 ? parts[1] : null;
+        })
+        .filter(Boolean)));
+      updateVesselListUI(vesselNames);
+    }
+
+    function processTopicsLegacy(result) {
+      if (!result || !Array.isArray(result.topics)) {
+        console.error('Invalid topic result format:', result);
+        useFallbackVessels();
+        return;
+      }
+      const vesselNames = Array.from(new Set(result.topics
+        .filter(topic => topic.endsWith('/odometry_sim'))
+        .map(topic => {
+          const parts = topic.split('/');
+          return parts.length >= 2 ? parts[1] : null;
+        })
+        .filter(Boolean)));
+      updateVesselListUI(vesselNames);
+    }
+
+    function useFallbackVessels() {
+      updateVesselListUI(defaultVessels);
+    }
+
+    function checkConnectionStatus() {
+      if (!isConnected) return;
+      const now = Date.now();
+      if (lastMessageTime > 0 && now - lastMessageTime > 3000) {
+        document.getElementById('connectionStatus').className = 'status-stale';
+        document.getElementById('connectionText').textContent = 'Connection Stale';
+      }
+      vessels.forEach(vessel => {
+        if (vessel.lastMessageTime === 0) return;
+        const delta = now - vessel.lastMessageTime;
+        if (delta > 5000) {
+          updateVesselStatus(vessel, 'disconnected');
+        } else if (delta > 2500) {
+          updateVesselStatus(vessel, 'stale');
+        } else {
+          updateVesselStatus(vessel, 'connected');
+        }
+      });
+    }
+
+    function quaternionToEuler(q) {
+      const x = q.x, y = q.y, z = q.z, w = q.w;
+      const sinr_cosp = 2 * (w * x + y * z);
+      const cosr_cosp = 1 - 2 * (x * x + y * y);
+      const roll = Math.atan2(sinr_cosp, cosr_cosp) * 180 / Math.PI;
+
+      const sinp = 2 * (w * y - z * x);
+      const pitch = Math.abs(sinp) >= 1 ? Math.sign(sinp) * 90 : Math.asin(sinp) * 180 / Math.PI;
+
+      const siny_cosp = 2 * (w * z + x * y);
+      const cosy_cosp = 1 - 2 * (y * y + z * z);
+      const yaw = -Math.atan2(siny_cosp, cosy_cosp) * 180 / Math.PI;
+
+      return { roll, pitch, yaw };
+    }
+
+    initScene();
+    connectToROS();
+  </script>
+</body>
+</html> 

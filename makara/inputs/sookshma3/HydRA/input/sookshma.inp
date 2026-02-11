@@ -1,0 +1,49 @@
+GCS - Global Coordinate System
+BCS - Body Coordinate System
+
+
+*start_read
+
+*job_prefix sookshma
+
+--------------------------------------------------------------------------------
+Body 1 parameters
+--------------------------------------------------------------------------------
+
+Specify vessel
+*vessel 1
+
+
+Specify location and yaw orientation of body with respect to GCS
+*xbody 1
+0.0 0.0 0.136 0.0
+
+Specify the radii of gyration about the BCS
+*xprdct 1
+0.16646922 0.00000000 0.06280127
+0.00000000 0.28607167 0.00000000        
+0.06280127 0.00000000 0.25167638
+
+Location of VCG in BCS
+*vcg 1 -0.136
+
+Specify which degrees of freedom are active for the body
+*modes 1
+0 0 1 1 1 0
+
+--------------------------------------------------------------------------------
+Frequency domain analysis parameters
+--------------------------------------------------------------------------------
+
+Number of frequencies 
+*nfrq 1
+0.0
+
+Number of wave directions
+*nbeta 1
+180
+
+Specify if plotted results should be output
+*plot_results 0
+
+*end_read

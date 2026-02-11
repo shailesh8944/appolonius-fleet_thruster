@@ -1,0 +1,39 @@
+{
+    "name": "OE5005 Development Container",
+    "image": "abhilashiit/oe5005:1.0",
+    "privileged": true,
+
+    "remoteEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}",
+        "ROS_DOMAIN_ID": "42"
+    },
+
+    "runArgs": [
+        "--network=host",
+        "--privileged"
+    ],
+
+    "mounts": [
+        "source=/dev/shm,target=/dev/shm,type=bind",
+        "source=/dev/sbg,target=/dev/sbg,type=bind",
+        "source=/dev/ardusimple,target=/dev/ardusimple,type=bind",
+        "source=/dev/propeller,target=/dev/propeller,type=bind",
+        "source=/dev/rudder,target=/dev/rudder,type=bind",
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+    ],
+
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/mavlab,type=bind",
+    "workspaceFolder": "/workspaces/mavlab",
+
+    "postCreateCommand": "pip install --upgrade pip && pip install casadi tqdm",
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "ms-python.python"
+            ]
+        }
+    }
+}

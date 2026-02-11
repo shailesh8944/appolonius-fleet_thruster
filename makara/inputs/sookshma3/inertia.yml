@@ -1,0 +1,4 @@
+mass: 7.65 # in kg
+buoyancy_mass: 7.65 # in kg
+inertia_matrix: None # in kg*m^2
+added_mass_matrix: None # in kg*m^2/s

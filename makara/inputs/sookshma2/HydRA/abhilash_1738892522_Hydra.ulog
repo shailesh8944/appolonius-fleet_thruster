@@ -1,0 +1,49 @@
+----------------------------------------------------------------
+HYDRA run at 07 February 2025 01:42:03
+----------------------------------------------------------------
+User ID: abhilash
+Job ID: 1738892522
+INFO : Reading input file
+WARN : Group number not set for vessel 1. Default group set to 0
+INFO : Finished reading input file
+INFO : Calculating Hydrostatics
+INFO : Processing grid of body 1
+INFO : Finished processing grid of body 1
+INFO : Calculating hydrostatics for body 1
+INFO : Finished calculating hydrostatics for body 1
+INFO : Displacements: [0.00746965 0.00747116 0.00747135]
+INFO : CoB: [ 2.89415958e-02 -3.89727093e-07 -1.62558889e-01]
+INFO : CoG: [ 2.89415958e-02 -3.89727093e-07 -1.36000000e-01]
+INFO : WPArea: 0.15623320409290414
+INFO : WSA: 0.2257555280986705
+INFO : BMT: 0.07832221028262651
+INFO : BML: 1.0009536614588637
+INFO : GMT: 0.05176332116831869
+INFO : GML: 0.9743947723445558
+INFO : Stiffness Matrix:
+INFO :                            0.0                            0.0                            0.0                            0.0                            0.0                            0.0 
+INFO :                            0.0                            0.0                            0.0                            0.0                            0.0                            0.0 
+INFO :                            0.0                            0.0             1570.4274596906203         0.00018161451513265536             -88.15351056571667                            0.0 
+INFO :                            0.0                            0.0         0.00018161451513265536             3.8874572938190495         -5.276130111896843e-05                            0.0 
+INFO :                            0.0                            0.0             -88.15351056571667         -5.276130111896843e-05              73.17764740196694         3.3881317890172014e-21 
+INFO :                            0.0                            0.0                            0.0                            0.0                            0.0                            0.0 
+INFO : Mass Matrix:
+INFO :              7.658131550092238                            0.0                            0.0                            0.0            -1.0415058908125443         2.9845813446279926e-06 
+INFO :                            0.0              7.658131550092238                            0.0             1.0415058908125443                            0.0            0.22163854762392618 
+INFO :                            0.0                            0.0              7.658131550092238        -2.9845813446279926e-06           -0.22163854762392618                            0.0 
+INFO :                           -0.0             1.0415058908125443        -2.9845813446279926e-06            0.21222215076264844                            0.0           0.030203667108747393 
+INFO :            -1.0415058908125443                           -0.0           -0.22163854762392618                            0.0             0.6267185145488658                            0.0 
+INFO :         2.9845813446279926e-06            0.22163854762392618                           -0.0           0.030203667108747393                            0.0             0.4850737124281931 
+INFO : 
+
+INFO : Calculating Radiation and Scattering
+INFO : Frequency 1 of 2: -1.00 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Frequency 2 of 2: 0.00 rad/s Speed: 0.00 m/s Group: 0 Direction: All
+INFO : Finished calculating frequency domain scattering and radiation forces
+INFO : Generating Output
+INFO : Writing output files
+INFO : Writing MAT files
+INFO : STATUS: Finished writing MAT files
+INFO : STATUS: Finished writing output files
+INFO : Hydra Run Completed Successfully
+INFO : Execution Time: 5.05 seconds

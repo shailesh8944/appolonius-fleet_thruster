@@ -1,0 +1,24 @@
+hydra_file: /workspaces/mavlab/inputs/mavymini/HydRA/MAVYMINI_hydra.json
+dim_flag: false
+cross_flow_drag: false
+
+# Surge hydrodynamic derivatives
+X_u_u: -0.01
+
+# Sway hydrodynamic derivatives
+Y_v_v: -0.010659050686665396
+Y_r_r: 0.0017799664706713543
+
+# Yaw hydrodynamic derivatives
+N_v_v: -0.0006242757399292063
+N_r_r: -0.001889456681929024
+
+# Heave hydrodynamic derivatives
+Z_w_w: -0.01
+
+
+## Consider underscore in the terms eg: X_u_u instead of Xuu
+
+
+
+

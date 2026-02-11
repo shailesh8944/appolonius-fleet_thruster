@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AUV Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AUV Live Simulation</h1>
+        <div class="chart-container">
+            <canvas id="positionChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="speedChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Position chart
+        const posCtx = document.getElementById('positionChart').getContext('2d');
+        const positionChart = new Chart(posCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Path',
+                    data: [],
+                    showLine: true,
+                    fill: false,
+                    borderColor: 'blue'
+                }, {
+                    label: 'Current Position',
+                    data: [],
+                    pointBackgroundColor: 'red',
+                    pointRadius: 8
+                }]
+            },
+            options: {
+                animation: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'X Position (m)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Y Position (m)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Speed chart
+        const speedCtx = document.getElementById('speedChart').getContext('2d');
+        const speedChart = new Chart(speedCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Speed',
+                    data: [],
+                    borderColor: 'green',
+                    fill: false
+                }]
+            },
+            options: {
+                animation: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (s)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Speed (m/s)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // WebSocket connection
+        const socket = new WebSocket('ws://' + window.location.host + '/ws');
+        
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            // Update position chart
+            positionChart.data.datasets[0].data.push({x: data.x, y: data.y});
+            positionChart.data.datasets[1].data = [{x: data.x, y: data.y}];
+            positionChart.update();
+            
+            // Update speed chart
+            speedChart.data.labels.push(data.time);
+            speedChart.data.datasets[0].data.push(data.speed);
+            speedChart.update();
+        };
+    </script>
+</body>
+</html> 

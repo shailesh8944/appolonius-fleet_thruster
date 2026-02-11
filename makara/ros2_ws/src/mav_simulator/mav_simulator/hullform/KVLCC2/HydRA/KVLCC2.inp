@@ -1,0 +1,115 @@
+GCS - Global Coordinate System
+BCS - Body Coordinate System
+
+
+*start_read
+
+*job_prefix KVLCC2
+
+--------------------------------------------------------------------------------
+Body 1 parameters
+--------------------------------------------------------------------------------
+
+Specify vessel
+*vessel 1 0
+
+
+Specify location and yaw orientation of body with respect to GCS
+*xbody 1
+0.0 0.0 0.0 0.0
+
+Specify the radii of gyration about the BCS
+*xprdct 1
+23.3040769	0	4.954553461
+0	80.07104856	0
+4.954553461	0	80.06970713
+
+
+Location of VCG in BCS
+*vcg 1 -2.2
+
+Location of LCG in BCS (Relevant only when vessel is not freely floating)
+**lcg 1 11.158
+
+Location of TCG in BCS (Relevant only when vessel is not freely floating)
+**tcg 1 0.0
+
+Specify which degrees of freedom are active for the body
+*modes 1
+0 0 1 1 1 0
+
+--------------------------------------------------------------------------------
+Frequency domain analysis parameters
+--------------------------------------------------------------------------------
+
+Number of frequencies 
+*nfrq -52
+-0.03 0.03
+
+Number of wave directions
+*nbeta 1
+0
+
+--------------------------------------------------------------------------------
+Time domain simulation parameters
+--------------------------------------------------------------------------------
+
+Specify initial condition for body (optional)
+*initial_condition 1
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 20.0 0.0 0.0
+
+Specify random seed (positive integer) for repeatablity
+*seed 5
+
+Specify extra linear damping in roll mode due to roll motion
+*lin_damp 4 4 4.048045E+007
+
+Specify extra quadratic damping in roll mode due to roll motion
+*quad_damp 4 4 6.292805E+008
+
+Specify ramp time to reduce the impact of transient motions (Do not use when 
+specifying initial conditions)
+**ramp_time 100.0
+
+Specify maximum simulation time
+*time_max 500.0
+
+Specify time step
+*time_step 0.25
+
+Specify regular incident waves
+*wave regular 2         Specify regular wave components here
+6.0 13 150 0            Height, Period, Direction, Phase
+4.0 10 135 90
+
+Specify Bretschneider spectrum for developing seas 
+**wave bret
+8 13 180 0              Height, Period, Direction, Spread flag
+1                       Parameter s for spread function
+
+Specify JONSWAP spectrum
+**wave jonswap
+4 20 135 0 3.3          Height, Period,Direction, Spread flag, Gamma
+5                       Parameter s for spread function
+
+Specify Pierson-Moskowitz spectrum for fully developed seas
+**wave pm
+6 20 135 0               Height, Period, Direction, Spread function
+50                      Parameter s for spread function
+
+Specify the maximum time for computation of Impulse Response Time 
+*irf_time 20
+
+Specify if linear equations of motion are to be simulated
+**linear_eom
+
+Specify if linear Froude-Krylov forces are to be considered for simulation
+**linear_fk
+
+Specify if linear hydrostatics are to be considered for simulation
+**linear_hst
+
+Specify if plotted results should be output
+*plot_results 0
+
+*end_read

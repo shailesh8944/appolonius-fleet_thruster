@@ -1,0 +1,98 @@
+/* Ensure the body takes up the full viewport height and centers content */
+html, body {
+    height: 100%; /* Full height to ensure the body takes up the full viewport height */
+    margin: 0; /* Remove default margin */
+}
+
+/* Flexbox styling for centering content */
+.centered-div-flex {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    width: 100vw; /* Full viewport height */
+    background-color: rgb(255, 255, 255); /* Optional: background color for visibility */
+}
+
+/* Grid styling for centering content */
+.centered-div-grid {
+    display: grid;
+    place-items: center; /* Center both horizontally and vertically */
+    width: 100vw; /* Full viewport height */
+    background-color: rgb(255, 255, 255); /* Optional: background color for visibility */
+}
+
+/* Styling for the centered div */
+.centered-div-chart {
+    width: 50vw; /* Fixed width or use percentage as needed */
+    height: auto; /* Fixed height or use percentage as needed */
+    background-color: rgb(255, 255, 255); /* Optional: for visibility */
+    display: flex; /* Optional: if you want to center content within the div */
+    justify-content: center; /* Center content horizontally within the div */
+    align-items: center; /* Center content vertically within the div */
+    text-align: center; /* Center text horizontally within the div */
+    border: 2px solid #ffffff; /* Optional: border for visibility */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+nav {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 15px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+p {
+    text-align: center;
+    color: #666;
+}
+
+.my_div {
+    background-color: rgb(255, 255, 255);
+    padding: 20px;
+    text-align: center;
+}
+
+.launch-item {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;
+    width: 100vw; /* Ensure each item takes up the full width */
+    margin-bottom: 10px; /* Optional: add some space between items */
+}
+
+#active-launches {
+    display: flex;
+    align-items: center; /* Center items horizontally */
+    flex-direction: column; /* Stack items vertically */
+}
